@@ -1225,7 +1225,7 @@ and transl_let rec_flag pat_expr_list body =
       if List.length real_pat_expr_list == 0 then
         add_sequence sequence body
       else
-        add_sequence sequence (transl_letrec real_pat_expr_list body)
+        transl_letrec real_pat_expr_list (add_sequence sequence body)
 
 and transl_setinstvar self var expr =
   let prim =
