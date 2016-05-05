@@ -192,6 +192,10 @@ class printer  ()= object(self:'self)
     | Virtual -> pp f "virtual@;"
 
   (* trailing space added *)
+  method static_flag f sf =
+    match sf with
+    | Nonstatic -> ()
+    | Static -> pp f "static "
   method rec_flag f rf =
     match rf with
     | Nonrecursive -> ()
@@ -1099,9 +1103,9 @@ class printer  ()= object(self:'self)
           self#item_attributes attrs
     | Pstr_type (_, []) -> assert false
     | Pstr_type (rf, l)  -> self#type_def_list f (rf, l)
-    | Pstr_value (rf, l) ->
+    | Pstr_value (sf, rf, l) ->
         (* pp f "@[<hov2>let %a%a@]"  self#rec_flag rf self#bindings l *)
-        pp f "@[<2>%a@]" self#bindings (rf,l)
+        pp f "@[<2>%a %a@]" self#static_flag sf self#bindings (rf,l)
     | Pstr_typext te -> self#type_extension f te
     | Pstr_exception ed -> self#exception_declaration f ed
     | Pstr_module x ->
