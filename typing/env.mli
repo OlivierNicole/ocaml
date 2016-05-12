@@ -51,6 +51,7 @@ val find_shadowed_types: Path.t -> t -> Path.t list
 
 (* Lookup by paths *)
 
+(** Find a value at stage 0 *)
 val find_value: Path.t -> t -> value_description
 val find_type: Path.t -> t -> type_declaration
 val find_type_descrs: Path.t -> t -> type_descriptions
@@ -58,6 +59,18 @@ val find_module: Path.t -> t -> module_declaration
 val find_modtype: Path.t -> t -> modtype_declaration
 val find_class: Path.t -> t -> class_declaration
 val find_cltype: Path.t -> t -> class_type_declaration
+
+(* Representation of a run stage (should be non-negative) *)
+type stage = int
+
+(** Find a value in a certain stage. *)
+val find_value_stage: stage -> Path.t -> t -> value_description
+val find_type_stage: stage -> Path.t -> t -> type_declaration
+val find_type_descr_stages: stage -> Path.t -> t -> type_descriptions
+val find_module_stage: stage -> Path.t -> t -> module_declaration
+val find_modtype_stage: stage -> Path.t -> t -> modtype_declaration
+val find_class_stage: stage -> Path.t -> t -> class_declaration
+val find_cltype_stage: stage -> Path.t -> t -> class_type_declaration
 
 val find_type_expansion:
     Path.t -> t -> type_expr list * type_expr * int option
@@ -276,9 +289,10 @@ val fold_labels:
   Longident.t option -> t -> 'a -> 'a
 
 (** Persistent structures are only traversed if they are already loaded. *)
+(* macros: specifying the stage is necessary. *)
 val fold_modules:
   (string -> Path.t -> module_declaration -> 'a -> 'a) ->
-  Longident.t option -> t -> 'a -> 'a
+  stage -> Longident.t option -> t -> 'a -> 'a
 
 val fold_modtypes:
   (string -> Path.t -> modtype_declaration -> 'a -> 'a) ->

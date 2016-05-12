@@ -337,8 +337,19 @@ type pers_struct =
     ps_filename: string;
     ps_flags: pers_flags list }
 
+(* structures for stage 0 (runtime) modules dependencies *)
 let persistent_structures =
   (Hashtbl.create 17 : (string, pers_struct option) Hashtbl.t)
+
+(* structures for module dependencies of all stages N where N > 0 *)
+let static_persistent_structures =
+  (Hashtbl.create 17 : (string, pers_struct option) Hashtbl.t)
+
+(* Matches a stage number with a structure table. *)
+let structures_of_stage =
+  function
+  | 0 -> persistent_structures
+  | n -> assert (n > 0); static_persistent_structures
 
 (* Consistency between persistent structures *)
 
@@ -377,9 +388,9 @@ let check_consistency ps =
 
 (* Reading persistent structures from .cmi files *)
 
-let save_pers_struct crc ps =
+let save_pers_struct crc ps stage =
   let modname = ps.ps_name in
-  Hashtbl.add persistent_structures modname (Some ps);
+  Hashtbl.add (structures_of_stage stage) modname (Some ps);
   List.iter
     (function
         | Rectypes -> ()
@@ -389,7 +400,7 @@ let save_pers_struct crc ps =
   Consistbl.set crc_units modname crc ps.ps_filename;
   add_import modname
 
-let read_pers_struct check modname filename =
+let read_pers_struct check modname filename stage =
   add_import modname;
   let cmi = read_cmi filename in
   let name = cmi.cmi_name in
@@ -423,12 +434,13 @@ let read_pers_struct check modname filename =
         | Opaque -> add_imported_opaque modname)
     ps.ps_flags;
   if check then check_consistency ps;
-  Hashtbl.add persistent_structures modname (Some ps);
+  Hashtbl.add (structures_of_stage stage) modname (Some ps);
   ps
 
-let find_pers_struct check name =
+let find_pers_struct check name stage =
   if name = "*predef*" then raise Not_found;
-  match Hashtbl.find persistent_structures name with
+  let structures = (structures_of_stage stage) in
+  match Hashtbl.find structures name with
   | Some ps -> ps
   | None -> raise Not_found
   | exception Not_found ->
@@ -436,15 +448,15 @@ let find_pers_struct check name =
         try
           find_in_path_uncap !load_path (name ^ ".cmi")
         with Not_found ->
-          Hashtbl.add persistent_structures name None;
+          Hashtbl.add structures name None;
           raise Not_found
       in
-      read_pers_struct check name filename
+      read_pers_struct check name filename stage
 
 (* Emits a warning if there is no valid cmi for name *)
-let check_pers_struct name =
+let check_pers_struct name stage =
   try
-    ignore (find_pers_struct false name)
+    ignore (find_pers_struct false name stage)
   with
   | Not_found ->
       let warn = Warnings.No_cmi_file(name, None) in
@@ -472,14 +484,14 @@ let check_pers_struct name =
       let warn = Warnings.No_cmi_file(name, Some msg) in
         Location.prerr_warning Location.none warn
 
-let read_pers_struct modname filename =
-  read_pers_struct true modname filename
+let read_pers_struct modname filename stage =
+  read_pers_struct true modname filename stage
 
-let find_pers_struct name =
-  find_pers_struct true name
+let find_pers_struct name stage =
+  find_pers_struct true name stage
 
-let check_pers_struct name =
-  if not (Hashtbl.mem persistent_structures name) then begin
+let check_pers_struct name stage =
+  if not (Hashtbl.mem (structures_of_stage stage) name) then begin
     (* PR#6843: record the weak dependency ([add_import]) regardless of
        whether the check suceeds, to help make builds more
        deterministic. *)
@@ -492,6 +504,7 @@ let check_pers_struct name =
 let reset_cache () =
   current_unit := "";
   Hashtbl.clear persistent_structures;
+  Hashtbl.clear static_persistent_structures;
   clear_imports ();
   Hashtbl.clear value_declarations;
   Hashtbl.clear type_declarations;
@@ -520,7 +533,7 @@ let get_unit_name () =
 
 (* Lookup by identifier *)
 
-let rec find_module_descr path env =
+let rec find_module_descr path env stage =
   match path with
     Pident id ->
       begin try
@@ -528,11 +541,11 @@ let rec find_module_descr path env =
         in desc
       with Not_found ->
         if Ident.persistent id && not (Ident.name id = !current_unit)
-        then (find_pers_struct (Ident.name id)).ps_comps
+        then (find_pers_struct (Ident.name id) stage).ps_comps
         else raise Not_found
       end
   | Pdot(p, s, _pos) ->
-      begin match get_components (find_module_descr p env) with
+      begin match get_components (find_module_descr p env stage) with
         Structure_comps c ->
           let (descr, _pos) = Tbl.find s c.comp_components in
           descr
@@ -540,20 +553,20 @@ let rec find_module_descr path env =
          raise Not_found
       end
   | Papply(p1, p2) ->
-      begin match get_components (find_module_descr p1 env) with
+      begin match get_components (find_module_descr p1 env stage) with
         Functor_comps f ->
           !components_of_functor_appl' f env p1 p2
       | Structure_comps _ ->
           raise Not_found
       end
 
-let find proj1 proj2 path env =
+let find proj1 proj2 stage path env =
   match path with
     Pident id ->
       let (_p, data) = EnvTbl.find_same id (proj1 env)
       in data
   | Pdot(p, s, _pos) ->
-      begin match get_components (find_module_descr p env) with
+      begin match get_components (find_module_descr p env stage) with
         Structure_comps c ->
           let (data, _pos) = Tbl.find s (proj2 c) in data
       | Functor_comps _ ->
@@ -562,16 +575,21 @@ let find proj1 proj2 path env =
   | Papply _ ->
       raise Not_found
 
-let find_value =
+let find_value_stage =
   find (fun env -> env.values) (fun sc -> sc.comp_values)
-and find_type_full =
+and find_type_full_stage =
   find (fun env -> env.types) (fun sc -> sc.comp_types)
-and find_modtype =
+and find_modtype_stage =
   find (fun env -> env.modtypes) (fun sc -> sc.comp_modtypes)
-and find_class =
+and find_class_stage =
   find (fun env -> env.classes) (fun sc -> sc.comp_classes)
-and find_cltype =
+and find_cltype_stage =
   find (fun env -> env.cltypes) (fun sc -> sc.comp_cltypes)
+
+let find_value = find_value_stage 0
+and find_modtype = find_modtype_stage 0
+and find_class = find_class_stage 0
+and find_cltype = find_cltype_stage 0
 
 let type_of_cstr path = function
   | {cstr_inlined = Some d; _} ->
@@ -579,12 +597,12 @@ let type_of_cstr path = function
   | _ ->
       assert false
 
-let find_type_full path env =
+let find_type_full_stage stage path env =
   match Path.constructor_typath path with
-  | Regular p -> find_type_full p env
+  | Regular p -> find_type_full_stage stage p env
   | Cstr (ty_path, s) ->
       let (_, (cstrs, _)) =
-        try find_type_full ty_path env
+        try find_type_full_stage stage ty_path env
         with Not_found -> assert false
       in
       let cstr =
@@ -600,7 +618,7 @@ let find_type_full path env =
       type_of_cstr path cstr
   | Ext (mod_path, s) ->
       let comps =
-        try find_module_descr mod_path env
+        try find_module_descr mod_path env stage
         with Not_found -> assert false
       in
       let comps =
@@ -618,10 +636,10 @@ let find_type_full path env =
       | [(cstr, _)] -> type_of_cstr path cstr
       | _ -> assert false
 
-let find_type p env =
-  fst (find_type_full p env)
-let find_type_descrs p env =
-  snd (find_type_full p env)
+let find_type_stage p env stage =
+  fst (find_type_full_stage p env stage)
+let find_type_descrs_stage p env stage =
+  snd (find_type_full_stage p env stage)
 
 let find_module ~alias path env =
   match path with
@@ -1086,6 +1104,7 @@ let lookup_cltype ?loc lid env =
 
 (* Iter on an environment (ignoring the body of functors and
    not yet evaluated structures) *)
+(* macros: not touching this for now *)
 
 type iter_cont = unit -> unit
 let iter_env_cont = ref []
@@ -1905,7 +1924,7 @@ let find_all_simple_list proj1 proj2 f lid env acc =
             acc
       end
 
-let fold_modules f lid env acc =
+let fold_modules f stage lid env acc =
   match lid with
     | None ->
       let acc =
@@ -1921,7 +1940,7 @@ let fold_modules f lid env acc =
             | Some ps ->
               f name (Pident(Ident.create_persistent name))
                      (md (Mty_signature (Lazy.force ps.ps_sig))) acc)
-        persistent_structures
+        (structures_of_stage stage)
         acc
     | Some l ->
       let p, desc = lookup_module_descr l env in
