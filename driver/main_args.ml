@@ -109,10 +109,6 @@ let mk_I f =
   "-I", Arg.String f, "<dir>  Add <dir> to the list of include directories"
 ;;
 
-let mk_M f =
-  "-M", Arg.String f, "<dir>  Add <dir> to the list of directories from which modules will be loaded in the static environment"
-;;
-
 let mk_impl f =
   "-impl", Arg.String f, "<file>  Compile <file> as a .ml file"
 ;;
@@ -708,7 +704,6 @@ let mk__ f =
 module type Common_options = sig
   val _absname : unit -> unit
   val _I : string -> unit
-  val _M : string -> unit
   val _labels : unit -> unit
   val _alias_deps : unit -> unit
   val _no_alias_deps : unit -> unit
@@ -931,7 +926,6 @@ struct
     mk_g_byt F._g;
     mk_i F._i;
     mk_I F._I;
-    mk_M F._M;
     mk_impl F._impl;
     mk_intf F._intf;
     mk_intf_suffix F._intf_suffix;
@@ -1007,7 +1001,6 @@ struct
   let list = [
     mk_absname F._absname;
     mk_I F._I;
-    mk_M F._M;
     mk_init F._init;
     mk_labels F._labels;
     mk_alias_deps F._alias_deps;
@@ -1074,7 +1067,6 @@ struct
     mk_g_opt F._g;
     mk_i F._i;
     mk_I F._I;
-    mk_M F._M;
     mk_impl F._impl;
     mk_inline F._inline;
     mk_inline_toplevel F._inline_toplevel;
@@ -1186,7 +1178,6 @@ module Make_opttop_options (F : Opttop_options) = struct
     mk_absname F._absname;
     mk_compact F._compact;
     mk_I F._I;
-    mk_M F._M;
     mk_init F._init;
     mk_inline F._inline;
     mk_inline_toplevel F._inline_toplevel;
