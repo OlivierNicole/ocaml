@@ -930,12 +930,14 @@ class printer  ()= object(self:'self)
     match x.psig_desc with
     | Psig_type (rf, l) ->
         self#type_def_list f (rf, l)
-    | Psig_value vd ->
-        let intro = if vd.pval_prim = [] then "val" else "external" in
-          pp f "@[<2>%s@ %a@ :@ %a@]%a" intro
-             protect_ident vd.pval_name.txt
-             self#value_description vd
-             self#item_attributes vd.pval_attributes
+    | Psig_value (sf, vd) ->
+        let intro =
+          (match sf with Nonstatic -> "" | Static -> "static ") ^
+          if vd.pval_prim = [] then "val" else "external" in
+        pp f "@[<2>%s@ %a@ :@ %a@]%a" intro
+           protect_ident vd.pval_name.txt
+           self#value_description vd
+           self#item_attributes vd.pval_attributes
     | Psig_typext te ->
         self#type_extension f te
     | Psig_exception ed ->
