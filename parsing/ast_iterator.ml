@@ -526,10 +526,11 @@ let default_iterator =
 
 
     open_description =
-      (fun this {popen_lid; popen_override = _; popen_attributes; popen_loc} ->
+      (fun this {popen_lid; popen_override = _; popen_attributes; popen_loc; popen_coerce} ->
          iter_loc this popen_lid;
          this.location this popen_loc;
-         this.attributes this popen_attributes
+         this.attributes this popen_attributes;
+         Misc.may (this.module_type this) popen_coerce
       );
 
 

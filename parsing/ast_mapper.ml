@@ -561,11 +561,13 @@ let default_mapper =
 
 
     open_description =
-      (fun this {popen_lid; popen_override; popen_attributes; popen_loc} ->
+      (fun this {popen_lid; popen_override; popen_attributes; popen_loc;
+           popen_coerce} ->
          Opn.mk (map_loc this popen_lid)
            ~override:popen_override
            ~loc:(this.location this popen_loc)
            ~attrs:(this.attributes this popen_attributes)
+           ?coerce:(Misc.may_map (this.module_type this) popen_coerce)
       );
 
 

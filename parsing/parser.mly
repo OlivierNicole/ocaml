@@ -810,6 +810,12 @@ str_include_statement:
         Incl.mk $3 ~attrs:(attrs@$4)
             ~loc:(symbol_rloc()) ~docs:(symbol_docs ())
       , ext }
+  | INCLUDE ext_attributes module_expr COLON module_type post_item_attributes
+      { let (ext, attrs) = $2 in
+        Incl.mk $3 ~attrs:(attrs@$6)
+            ~loc:(symbol_rloc()) ~docs:(symbol_docs ())
+            ~coerce:$5
+      , ext }
 ;
 module_binding_body:
     EQUAL module_expr
@@ -921,6 +927,12 @@ open_statement:
       { let (ext, attrs) = $3 in
         Opn.mk (mkrhs $4 4) ~override:$2 ~attrs:(attrs@$5)
           ~loc:(symbol_rloc()) ~docs:(symbol_docs ())
+      , ext}
+  | OPEN override_flag ext_attributes mod_longident COLON module_type post_item_attributes
+      { let (ext, attrs) = $3 in
+        Opn.mk (mkrhs $4 4) ~override:$2 ~attrs:(attrs@$7)
+          ~loc:(symbol_rloc()) ~docs:(symbol_docs ())
+          ~coerce:$6
       , ext}
 ;
 sig_include_statement:

@@ -19,6 +19,11 @@ open Lexing;;
 open Location;;
 open Parsetree;;
 
+let fmt_option f ppf =
+  function
+  | None -> fprintf ppf "None"
+  | Some x -> fprintf ppf "Some %a" f x
+
 let fmt_position with_name f l =
   let fname = if with_name then l.pos_fname else "" in
   if l.pos_lnum = -1
@@ -680,9 +685,10 @@ and signature_item i ppf x =
       attributes i ppf x.pmtd_attributes;
       modtype_declaration i ppf x.pmtd_type
   | Psig_open od ->
-      line i ppf "Psig_open %a %a\n"
+      line i ppf "Psig_open %a %a %a\n"
         fmt_override_flag od.popen_override
-        fmt_longident_loc od.popen_lid;
+        fmt_longident_loc od.popen_lid
+        (fmt_option (module_type i)) od.popen_coerce;
       attributes i ppf od.popen_attributes
   | Psig_include incl ->
       line i ppf "Psig_include\n";
@@ -787,9 +793,10 @@ and structure_item i ppf x =
       attributes i ppf x.pmtd_attributes;
       modtype_declaration i ppf x.pmtd_type
   | Pstr_open od ->
-      line i ppf "Pstr_open %a %a\n"
+      line i ppf "Pstr_open %a %a %a\n"
         fmt_override_flag od.popen_override
-        fmt_longident_loc od.popen_lid;
+        fmt_longident_loc od.popen_lid
+        (fmt_option (module_type i)) od.popen_coerce;
       attributes i ppf od.popen_attributes
   | Pstr_class (l) ->
       line i ppf "Pstr_class\n";

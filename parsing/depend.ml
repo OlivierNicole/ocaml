@@ -328,6 +328,9 @@ and add_modtype_binding bv mty =
   | _ ->
       if !Clflags.transparent_modules then add_modtype bv mty; bound
 
+and add_coerce bv coerce =
+  Misc.may (add_modtype bv) coerce
+
 and add_signature bv sg =
   ignore (add_signature_binding bv sg)
 
@@ -363,6 +366,7 @@ and add_sig_item (bv, m) item =
       end;
       (bv, m)
   | Psig_open od ->
+      add_coerce bv od.popen_coerce;
       (open_module bv od.popen_lid.txt, m)
   | Psig_include incl ->
       let Node (s, m') = add_modtype_binding bv incl.pincl_mod in
@@ -454,6 +458,7 @@ and add_struct_item (bv, m) item : _ StringMap.t * _ StringMap.t =
       end;
       (bv, m)
   | Pstr_open od ->
+      add_coerce bv od.popen_coerce;
       (open_module bv od.popen_lid.txt, m)
   | Pstr_class cdl ->
       List.iter (add_class_declaration bv) cdl; (bv, m)

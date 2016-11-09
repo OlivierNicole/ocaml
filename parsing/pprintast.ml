@@ -945,6 +945,12 @@ and module_type ctxt f x =
 
 and signature ctxt f x =  list ~sep:"@\n" (signature_item ctxt) f x
 
+and open_coerce ctxt f =
+  function
+  | None -> ()
+  | Some mt ->
+      pp f " :@ %a" (module_type ctxt) mt
+
 and signature_item ctxt f x : unit =
   match x.psig_desc with
   | Psig_type (rf, l) ->
@@ -985,9 +991,10 @@ and signature_item ctxt f x : unit =
         (module_type ctxt) pmd.pmd_type
         (item_attributes ctxt) pmd.pmd_attributes
   | Psig_open od ->
-      pp f "@[<hov2>open%s@ %a@]%a"
+      pp f "@[<hov2>open%s@ %a%a@]%a"
         (override od.popen_override)
         longident_loc od.popen_lid
+        (open_coerce ctxt) od.popen_coerce
         (item_attributes ctxt) od.popen_attributes
   | Psig_include incl ->
       pp f "@[<hov2>include@ %a@]%a"
@@ -1180,9 +1187,10 @@ and structure_item ctxt f x =
         ) x.pmb_expr
         (item_attributes ctxt) x.pmb_attributes
   | Pstr_open od ->
-      pp f "@[<2>open%s@;%a@]%a"
+      pp f "@[<2>open%s@;%a%a@]%a"
         (override od.popen_override)
         longident_loc od.popen_lid
+        (open_coerce ctxt) od.popen_coerce
         (item_attributes ctxt) od.popen_attributes
   | Pstr_modtype {pmtd_name=s; pmtd_type=md; pmtd_attributes=attrs} ->
       pp f "@[<hov2>module@ type@ %s%a@]%a"

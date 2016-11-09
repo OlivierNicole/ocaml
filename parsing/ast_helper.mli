@@ -323,13 +323,14 @@ module Mb:
 module Opn:
   sig
     val mk: ?loc: loc -> ?attrs:attrs -> ?docs:docs ->
-      ?override:override_flag -> lid -> open_description
+      ?override:override_flag -> ?coerce:module_type -> lid -> open_description
   end
 
 (** Includes *)
 module Incl:
   sig
-    val mk: ?loc: loc -> ?attrs:attrs -> ?docs:docs -> 'a -> 'a include_infos
+    val mk: ?loc: loc -> ?attrs:attrs -> ?docs:docs -> ?coerce:module_type ->
+      'a -> 'a include_infos
   end
 
 (** Value bindings *)

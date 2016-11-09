@@ -731,6 +731,7 @@ and open_description =
      popen_override: override_flag;
      popen_loc: Location.t;
      popen_attributes: attributes;
+     popen_coerce: module_type option;
     }
 (* open! X - popen_override = Override (silences the 'used identifier
                               shadowing' warning)
@@ -742,6 +743,7 @@ and 'a include_infos =
      pincl_mod: 'a;
      pincl_loc: Location.t;
      pincl_attributes: attributes;
+     pincl_coerce: module_type option;
     }
 
 and include_description = module_type include_infos
