@@ -1580,7 +1580,7 @@ let () =
   Typecore.type_module := type_module_alias;
   Typetexp.transl_modtype_longident := transl_modtype_longident;
   Typetexp.transl_modtype := transl_modtype;
-  Typecore.type_open := type_open_ ?toplevel:None;
+  Typecore.type_open := type_open_ ?toplevel:None None;
   Typecore.type_package := type_package;
   type_module_type_of_fwd := type_module_type_of
 
