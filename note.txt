@@ -1,0 +1,2 @@
+We should create another function, a clone of `Env.open_signature`, that takes
+two signatures `sg` and `sg'` (`sg` being included in `sg'`)
