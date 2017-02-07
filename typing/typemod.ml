@@ -82,14 +82,14 @@ let extract_sig_open env loc mty =
 
 (* Compute the environment after opening a module *)
 
-let type_open_ ?toplevel ovf env loc lid =
+let type_open_ ?toplevel coerce ovf env loc lid =
   let path, md = Typetexp.find_module env lid.loc lid.txt in
   let sg = extract_sig_open env lid.loc md.md_type in
   path, Env.open_signature ~loc ?toplevel ovf path sg env
 
 let type_open ?toplevel env sod =
   let (path, newenv) =
-    type_open_ ?toplevel sod.popen_override env sod.popen_loc sod.popen_lid
+    type_open_ ?toplevel None sod.popen_override env sod.popen_loc sod.popen_lid
   in
   let od =
     {
