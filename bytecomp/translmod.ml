@@ -101,7 +101,7 @@ module TranslSplicesIterator = struct
 
   let enter_expression expr =
     match expr.exp_desc with
-    | Texp_escape e ->
+    | Texp_escape { esc_exp = e } ->
         if !quote_depth = 0 && !str_depth = 0 then
           let body =
             Translquote.transl_close_expression
@@ -982,6 +982,43 @@ let required_globals ~flambda body =
 
 (* Compile an implementation *)
 
+(* Define an AST iterator that traverses the AST *in reading order*, and
+ * assigns to every top-level splice its position in the global splice array.
+ *)
+module SpliceAssigningParam = struct
+  open TypedtreeIter
+  include DefaultIteratorArgument
+
+  let splice_index = ref 0
+  let quote_depth = ref 0
+
+  let enter_expression exp =
+    match exp.exp_desc with
+    | Texp_escape desc ->
+        if !quote_depth = 0 then begin
+          desc.esc_index <- Some !splice_index;
+          incr splice_index
+        end
+    | Texp_quote _ ->
+        incr quote_depth
+    | _ -> ()
+
+  let leave_expression exp =
+    match exp.exp_desc with
+    | Texp_quote _ ->
+        decr quote_depth
+    | _ -> ()
+end
+
+module SpliceAssigning : sig
+  val assign_splices : structure -> unit
+end = struct
+  include TypedtreeIter.MakeIterator(SpliceAssigningParam)
+
+  let assign_splices str =
+    iter_structure str
+end
+
 let transl_implementation_flambda module_name (str, cc) =
   reset_labels ();
   primitive_declarations := [];
@@ -1000,7 +1037,6 @@ let transl_implementation_flambda module_name (str, cc) =
 let transl_implementation module_name target_phase (str, cc) =
   if target_phase = Static then
     let module_id = Ident.create_persistent module_name in
-    Translcore.set_transl_splices None;
     nb_splices := 0;
     let (mod_body, size) =
       transl_structure Location.none [] cc (Some (Path.Pident module_id))
@@ -1015,6 +1051,7 @@ let transl_implementation module_name target_phase (str, cc) =
       code = code }
   else
     let implementation =
+      SpliceAssigning.assign_splices str;
       transl_implementation_flambda module_name (str, cc)
     in
     let code =
@@ -1694,7 +1731,6 @@ let transl_toplevel_definition target_phase str =
   reset_labels ();
   Hashtbl.clear used_primitives;
   if target_phase = Static then begin
-    Translcore.set_transl_splices None;
     nb_splices := 0;
     let lam =
       make_sequence (transl_toplevel_item_and_close target_phase) str.str_items
