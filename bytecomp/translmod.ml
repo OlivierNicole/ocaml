@@ -92,7 +92,7 @@ let transl_toplevel_splice exp =
 (* ordered array of lambda blocks for stage-0 splices *)
 let item_splices = ref ([] : lambda list)
 
-module TranslSplicesIterator = struct
+module FindSplicesIterator = struct
   open TypedtreeIter
   include DefaultIteratorArgument
 
@@ -132,14 +132,17 @@ module TranslSplicesIterator = struct
     decr str_depth
 end
 
-module TranslSplices = TypedtreeIter.MakeIterator(TranslSplicesIterator)
+module FindSplicesIter = TypedtreeIter.MakeIterator(TranslSplicesIterator)
 
-let nb_splices = ref 0
+let find_item_splices str_item =
+  TranslSplices.iter_structure_item item;
+  let splices = !item_splices in
+  item_splices := [];
+  splices
+
 let splicearray_id = Ident.create_persistent "*splicearray*"
 
-let transl_item_splices item item_lam =
-  (* Find splices in current structure item *)
-  TranslSplices.iter_structure_item item;
+let transl_item_splices splices item_lam =
   (* Add the code for running splices *)
   let wrap_seq str_lam (idx, splice_lam) =
     Lsequence (
@@ -149,14 +152,9 @@ let transl_item_splices item item_lam =
       str_lam)
   in
   let indexed_splices =
-    List.mapi
-      (fun i spl -> (!nb_splices + i, spl))
-      !item_splices
+    List.mapi (fun i spl -> (!nb_splices + i, spl)) splices
   in
-  let lam = List.fold_left wrap_seq item_lam indexed_splices in
-  item_splices := [];
-  nb_splices := !nb_splices + List.length indexed_splices;
-  lam
+  List.fold_left wrap_seq item_lam indexed_splices
 
 let rec repeat n x =
   if n <= 0 then []
@@ -178,6 +176,11 @@ let insert_splice_array module_id nb_splices str_lam =
     Lsequence (
       Lprim (Psetglobal module_id, [str_lam], Location.none),
       Lvar id))
+
+type splice_state = {
+  splice_counter : int;
+  detect_splices : structure_item -> lambda list;
+  insert_splices : lambda list -> 
 
 (* Wrap a piece of lambda code so that, if the original code returned a value,
  * the result of this function will execute the original code, marshal the
@@ -774,7 +777,7 @@ and transl_structure loc fields cc rootpath target_phase item_postproc
         let target_phase = if target_phase = Static then 1 else 0 in
         item_phase = target_phase
       in
-      let (item_lam, size) =
+      let (str_lam, size) =
       match item.str_desc with
       | Tstr_eval (expr, _) ->
           (* toplevel expressions are deemed run-time *)
@@ -934,7 +937,7 @@ and transl_structure loc fields cc rootpath target_phase item_postproc
           transl_structure loc fields cc rootpath target_phase
             item_postproc final_env rem
       in
-      (item_postproc item item_lam, size)
+      (item_postproc item str_lam, size)
 
 and pure_module m =
   match m.mod_desc with
