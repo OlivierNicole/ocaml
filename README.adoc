@@ -9,7 +9,7 @@ regular basis, once a set of changes has been applied and the tests run.
 This is an experimental implementation of OCaml macros, originally designed by
 Leo White and Jeremy Yallop:
 
-http://www.lpw25.net/ocaml2015-abs1.pdf
+http://www.lpw25.net/papers/ocaml2015-abs1.pdf
 
 You can find a summary of the current progress here:
 
