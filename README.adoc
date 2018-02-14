@@ -13,7 +13,7 @@ http://www.lpw25.net/papers/ocaml2015-abs1.pdf
 
 You can find a summary of the current progress here:
 
-https://oliviernicole.github.io/about_macros.html
+http://otini.chnik.fr/posts/2017-01-06-modular-macros.html
 
 This branch is based on version 4.04 of OCaml.
 
