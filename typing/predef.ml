@@ -38,6 +38,7 @@ and ident_exn = ident_create "exn"
 and ident_eff = ident_create "eff"
 and ident_continuation = ident_create "continuation"
 and ident_array = ident_create "array"
+and ident_iarray = ident_create "iarray"
 and ident_list = ident_create "list"
 and ident_option = ident_create "option"
 and ident_nativeint = ident_create "nativeint"
@@ -58,6 +59,7 @@ and path_exn = Pident ident_exn
 and path_eff = Pident ident_eff
 and path_continuation = Pident ident_continuation
 and path_array = Pident ident_array
+and path_iarray = Pident ident_iarray
 and path_list = Pident ident_list
 and path_option = Pident ident_option
 and path_nativeint = Pident ident_nativeint
@@ -79,6 +81,7 @@ and type_eff t = newgenty (Tconstr(path_eff, [t], ref Mnil))
 and type_continuation t1 t2 =
   newgenty (Tconstr(path_continuation, [t1; t2], ref Mnil))
 and type_array t = newgenty (Tconstr(path_array, [t], ref Mnil))
+and type_iarray t = newgenty (Tconstr(path_iarray, [t], ref Mnil))
 and type_list t = newgenty (Tconstr(path_list, [t], ref Mnil))
 and type_option t = newgenty (Tconstr(path_option, [t], ref Mnil))
 and type_nativeint = newgenty (Tconstr(path_nativeint, [], ref Mnil))
@@ -244,6 +247,9 @@ let build_initial_env add_type add_extension empty_env =
   |> add_type ident_extension_constructor
   |> add_type ident_float
   |> add_type ident_floatarray
+  |> add_type1 ident_iarray
+       ~variance:Variance.covariant
+       ~separability:Separability.Ind
   |> add_type ident_int ~immediate:Always
   |> add_type ident_int32
   |> add_type ident_int64

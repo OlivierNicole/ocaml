@@ -349,6 +349,10 @@ let tyvar ppf v = Format_doc.compat Doc.tyvar ppf v
 let tyvar_loc f str = tyvar f str.txt
 let string_quot f x = pp f "`%a" ident_of_name x
 
+let array_internal_delim = function
+  | Mutable -> '|'
+  | Immutable -> ':'
+
 (* c ['a,'b] *)
 let rec class_params_def ctxt f =  function
   | [] -> ()
@@ -530,8 +534,11 @@ and simple_pattern ctxt (f:Format.formatter) (x:pattern) : unit =
         pp f  "%s" x
     | Ppat_any -> pp f "_";
     | Ppat_var ({txt = txt;_}) -> ident_of_name f txt
-    | Ppat_array l ->
-        pp f "@[<2>[|%a|]@]"  (list (pattern1 ctxt) ~sep:";") l
+    | Ppat_array (mut, l) ->
+        pp f "@[<2>[%c%a%c]@]"
+          (array_internal_delim mut)
+          (list (pattern1 ctxt) ~sep:";") l
+          (array_internal_delim mut)
     | Ppat_unpack { txt = None } ->
         pp f "(module@ _)@ "
     | Ppat_unpack { txt = Some s } ->
@@ -646,7 +653,8 @@ and sugar_expr ctxt f e =
           | Ldot (Lident "Bigarray", "Array3"), i1 :: i2 :: i3 :: rest ->
             print ".{" "," "}" (simple_expr ctxt) [i1; i2; i3] rest
           | Ldot (Lident "Bigarray", "Genarray"),
-            {pexp_desc = Pexp_array indexes; pexp_attributes = []} :: rest ->
+            {pexp_desc = Pexp_array (_, indexes); pexp_attributes = []}
+            :: rest ->
               print ".{" "," "}" (simple_expr ctxt) indexes rest
           | _ -> false
         end
@@ -659,7 +667,7 @@ and sugar_expr ctxt f e =
           let multi_indices = String.contains s ';' in
           let i =
               match i.pexp_desc with
-                | Pexp_array l when multi_indices -> l
+                | Pexp_array (_, l) when multi_indices -> l
                 | _ -> [ i ] in
           let assign = last_is '-' s in
           let kind =
@@ -941,9 +949,11 @@ and simple_expr ctxt f x =
         pp f "@[<hv0>@[<hv2>{@;%a%a@]@;}@]"(* "@[<hov2>{%a%a}@]" *)
           (option ~last:" with@;" (simple_expr ctxt)) eo
           (list longident_x_expression ~sep:";@;") l
-    | Pexp_array (l) ->
-        pp f "@[<0>@[<2>[|%a|]@]@]"
+    | Pexp_array (mut, l) ->
+        pp f "@[<0>@[<2>[%c%a%c]@]@]"
+          (array_internal_delim mut)
           (list (simple_expr (under_semi ctxt)) ~sep:";") l
+          (array_internal_delim mut)
     | Pexp_while (e1, e2) ->
         let fmt : (_,_,_) format = "@[<2>while@;%a@;do@;%a@;done@]" in
         pp f fmt (expression ctxt) e1 (expression ctxt) e2
