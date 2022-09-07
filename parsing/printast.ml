@@ -226,8 +226,8 @@ and pattern i ppf x =
   | Ppat_record (l, c) ->
       line i ppf "Ppat_record %a\n" fmt_closed_flag c;
       list i longident_x_pattern ppf l;
-  | Ppat_array (l) ->
-      line i ppf "Ppat_array\n";
+  | Ppat_array (mut, l) ->
+      line i ppf "Ppat_array %a\n" fmt_mutable_flag mut;
       list i pattern ppf l;
   | Ppat_or (p1, p2) ->
       line i ppf "Ppat_or\n";
@@ -307,8 +307,8 @@ and expression i ppf x =
       expression i ppf e1;
       longident_loc i ppf li;
       expression i ppf e2;
-  | Pexp_array (l) ->
-      line i ppf "Pexp_array\n";
+  | Pexp_array (mut, l) ->
+      line i ppf "Pexp_array %a\n" fmt_mutable_flag mut;
       list i expression ppf l;
   | Pexp_ifthenelse (e1, e2, eo) ->
       line i ppf "Pexp_ifthenelse\n";

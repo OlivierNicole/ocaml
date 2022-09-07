@@ -261,7 +261,11 @@ and pattern_desc =
 
            Invariant: [n > 0]
          *)
-  | Ppat_array of pattern list  (** Pattern [[| P1; ...; Pn |]] *)
+  | Ppat_array of mutable_flag * pattern list
+      (** [Ppat_array(mut, [p1; ...; pn])] represents:
+          - [[| p1; ...; pn |]] when [mut] is [Mutable]
+          - [[: p1; ...; pn :]] when [mut] is [Immutable]
+         *)
   | Ppat_or of pattern * pattern  (** Pattern [P1 | P2] *)
   | Ppat_constraint of pattern * core_type  (** Pattern [(P : T)] *)
   | Ppat_type of Longident.t loc  (** Pattern [#tconst] *)
@@ -358,7 +362,11 @@ and expression_desc =
   | Pexp_field of expression * Longident.t loc  (** [E.l] *)
   | Pexp_setfield of expression * Longident.t loc * expression
       (** [E1.l <- E2] *)
-  | Pexp_array of expression list  (** [[| E1; ...; En |]] *)
+  | Pexp_array of mutable_flag * expression list
+      (** [Pexp_array(mut, [e1; ...; en])] represents:
+          - [[| e1; ...; en |]] when [mut] is [Mutable]
+          - [[: e1; ...; en :]] when [mut] is [Immutable]
+         *)
   | Pexp_ifthenelse of expression * expression * expression option
       (** [if E1 then E2 else E3] *)
   | Pexp_sequence of expression * expression  (** [E1; E2] *)

@@ -939,11 +939,15 @@ let solve_Ppat_record_field ~refine loc penv label label_lid record_ty =
     (ty_arg, [ty_res; ty_arg])
   end
 
-let solve_Ppat_array ~refine loc env expected_ty =
+let solve_Ppat_array ~refine loc env ~mutability expected_ty =
+  let type_some_array = match mutability with
+    | Immutable -> Predef.type_iarray
+    | Mutable -> Predef.type_array
+  in
   let ty_elt = newgenvar() in
   let expected_ty = generic_instance expected_ty in
   unify_pat_types_refine ~refine
-    loc env (Predef.type_array ty_elt) expected_ty;
+    loc env (type_some_array ty_elt) expected_ty;
   ty_elt
 
 let solve_Ppat_lazy ~refine loc env expected_ty =
@@ -1537,7 +1541,7 @@ let rec has_literal_pattern p = match p.ppat_desc with
   | Ppat_open (_, p) ->
      has_literal_pattern p
   | Ppat_tuple ps
-  | Ppat_array ps ->
+  | Ppat_array (_, ps) ->
      List.exists has_literal_pattern ps
   | Ppat_record (ps, _) ->
      List.exists (fun (_,p) -> has_literal_pattern p) ps
@@ -1889,11 +1893,13 @@ and type_pat_aux
           lid_sp_list
       in
       rvp @@ solve_expected (make_record_pat lbl_a_list)
-  | Ppat_array spl ->
-      let ty_elt = solve_Ppat_array ~refine:false loc penv expected_ty in
+  | Ppat_array (mutability, spl) ->
+      let ty_elt =
+        solve_Ppat_array ~refine:false loc penv ~mutability expected_ty
+      in
       let pl = List.map (fun p -> type_pat tps Value p ty_elt) spl in
       rvp {
-        pat_desc = Tpat_array pl;
+        pat_desc = Tpat_array (mutability, pl);
         pat_loc = loc; pat_extra=[];
         pat_type = instance expected_ty;
         pat_attributes = sp.ppat_attributes;
@@ -2394,10 +2400,10 @@ let rec check_counter_example_pat
       in
       map_fold_cont type_label_pat fields
         (fun fields -> mkp k (Tpat_record (fields, closed)))
-  | Tpat_array tpl ->
-      let ty_elt = solve_Ppat_array ~refine loc penv expected_ty in
+  | Tpat_array (mutability, tpl) ->
+      let ty_elt = solve_Ppat_array ~refine loc penv ~mutability expected_ty in
       map_fold_cont (fun p -> check_rec p ty_elt) tpl
-        (fun pl -> mkp k (Tpat_array pl))
+        (fun pl -> mkp k (Tpat_array (mutability, pl)))
   | Tpat_or(tp1, tp2, _) ->
       (* We are in counter-example mode, but try to avoid backtracking *)
       let must_split =
@@ -2536,7 +2542,7 @@ let rec is_nonexpansive exp =
   | Texp_constant _
   | Texp_unreachable
   | Texp_function _
-  | Texp_array [] -> true
+  | Texp_array (_, []) -> true
   | Texp_let(_rec_flag, pat_exp_list, body) ->
       List.for_all (fun vb -> is_nonexpansive vb.vb_expr) pat_exp_list &&
       is_nonexpansive body
@@ -2613,7 +2619,7 @@ let rec is_nonexpansive exp =
                          ("%raise" | "%reraise" | "%raise_notrace")}}) },
       [Nolabel, Some e]) ->
      is_nonexpansive e
-  | Texp_array (_ :: _)
+  | Texp_array (_, _ :: _)
   | Texp_apply _
   | Texp_try _
   | Texp_setfield _
@@ -2998,7 +3004,7 @@ let shallow_iter_ppat f p =
   | Ppat_construct (_, None)
   | Ppat_extension _
   | Ppat_type _ | Ppat_unpack _ -> ()
-  | Ppat_array pats -> List.iter f pats
+  | Ppat_array (_, pats) -> List.iter f pats
   | Ppat_or (p1,p2) -> f p1; f p2
   | Ppat_variant (_, arg) -> Option.iter f arg
   | Ppat_tuple lst ->  List.iter f lst
@@ -3783,15 +3789,19 @@ and type_expect_
         exp_type = instance Predef.type_unit;
         exp_attributes = sexp.pexp_attributes;
         exp_env = env }
-  | Pexp_array(sargl) ->
+  | Pexp_array(mutability, sargl) ->
       let ty = newgenvar() in
-      let to_unify = Predef.type_array ty in
+      let to_unify =
+        match mutability with
+        | Mutable -> Predef.type_array ty
+        | Immutable -> Predef.type_iarray ty
+      in
       with_explanation (fun () ->
         unify_exp_types loc env to_unify (generic_instance ty_expected));
       let argl =
         List.map (fun sarg -> type_expect env sarg (mk_expected ty)) sargl in
       re {
-        exp_desc = Texp_array argl;
+        exp_desc = Texp_array (mutability, argl);
         exp_loc = loc; exp_extra = [];
         exp_type = instance ty_expected;
         exp_attributes = sexp.pexp_attributes;

@@ -179,6 +179,8 @@ let presume = "Presume"
 let preperform = "Preperform"
 let pdls_get = "Pdls_get"
 let ppoll = "Ppoll"
+let parray_of_iarray = "Parray_of_iarray"
+let parray_to_iarray = "Parray_to_iarray"
 
 let pabsfloat_arg = "Pabsfloat_arg"
 let paddbint_arg = "Paddbint_arg"
@@ -292,6 +294,8 @@ let presume_arg = "Presume_arg"
 let preperform_arg = "Preperform_arg"
 let pdls_get_arg = "Pdls_get_arg"
 let ppoll_arg = "Ppoll_arg"
+let parray_of_iarray_arg = "Parray_of_iarray_arg"
+let parray_to_iarray_arg = "Parray_to_iarray_arg"
 
 let raise = "raise"
 let raise_arg = "raise_arg"
@@ -437,6 +441,8 @@ let of_primitive : Lambda.primitive -> string = function
   | Preperform -> preperform
   | Pdls_get -> pdls_get
   | Ppoll -> ppoll
+  | Parray_of_iarray -> parray_of_iarray
+  | Parray_to_iarray -> parray_to_iarray
 
 let of_primitive_arg : Lambda.primitive -> string = function
   | Pbytes_of_string -> pbytes_of_string_arg
@@ -550,3 +556,5 @@ let of_primitive_arg : Lambda.primitive -> string = function
   | Preperform -> preperform_arg
   | Pdls_get -> pdls_get_arg
   | Ppoll -> ppoll_arg
+  | Parray_of_iarray -> parray_of_iarray_arg
+  | Parray_to_iarray -> parray_to_iarray_arg
