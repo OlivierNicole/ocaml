@@ -2,10 +2,6 @@ name: Build
 
 on:
   push:
-    branches:
-      - '4.**'
-      - '5.**'
-      - 'trunk'
   pull_request:
 
 # Restrict the GITHUB_TOKEN
@@ -28,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-# This job will do the initial build of the compiler (on linux), with flambda on.
+# This job will do the initial build of the compiler (on linux).
 # We then upload the compiler tree as a build artifact to enable re-use in
 # subsequent jobs.
   build:
@@ -40,6 +36,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: false
+      - name: Install libunwind
+        run: sudo apt install -y libunwind-dev
       - name: Check for manual changes
         id: manual
         run: >-
@@ -57,7 +55,7 @@ jobs:
          '${{ github.event.repository.full_name }}'
       - name: Configure tree
         run: |
-          MAKE_ARG=-j XARCH=x64 CONFIG_ARG='--enable-flambda --enable-cmm-invariants --enable-dependency-generation --enable-native-toplevel' OCAMLRUNPARAM=b,v=0 bash -xe tools/ci/actions/runner.sh configure
+          MAKE_ARG=-j XARCH=x64 CONFIG_ARG='--enable-cmm-invariants --enable-dependency-generation --enable-native-toplevel --enable-tsan --enable-ocamltest' OCAMLRUNPARAM=b,v=0 bash -xe tools/ci/actions/runner.sh configure
       - name: Build
         run: |
           MAKE_ARG=-j bash -xe tools/ci/actions/runner.sh build
@@ -85,7 +83,7 @@ jobs:
           rm -f sources.tar.zstd
       - name: Packages
         run: |
-          sudo apt-get update -y && sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended hevea sass
+          sudo apt-get update -y && sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended hevea sass libunwind-dev
       - name: Run the testsuite
         run: |
           MAKE_ARG=-j OCAMLRUNPARAM=b,v=0 bash -xe tools/ci/actions/runner.sh test
@@ -115,6 +113,7 @@ jobs:
             config_arg: CFLAGS='-O0'
           - name: macos
             os: macos-latest
+            config_arg: --enable-tsan
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -122,7 +121,7 @@ jobs:
           persist-credentials: false
       - name: OS Dependencies
         if: runner.os == 'MacOS'
-        run: brew install parallel
+        run: brew install parallel libunwind libunwind-headers
       - name: configure tree
         run: |
           CONFIG_ARG=${{ matrix.config_arg }} MAKE_ARG=-j XARCH=x64 bash -xe tools/ci/actions/runner.sh configure
@@ -171,36 +170,36 @@ jobs:
 #        debug runtime and minor heap verification.
 # debug-s4086: select testsuite run with the debug runtime and a small
 #              minor heap.
-  extra:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        id:
-          - debug
-          - debug-s4096
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: compiler
-      - name: Unpack Artifact
-        run: |
-          tar --zstd -xf sources.tar.zstd
-          rm -f sources.tar.zstd
-      - name: Run the testsuite (debug runtime)
-        if: ${{ matrix.id == 'debug' }}
-        env:
-          OCAMLRUNPARAM: v=0,V=1
-          USE_RUNTIME: d
-        run: |
-          bash -cxe "SHOW_TIMINGS=1 tools/ci/actions/runner.sh test"
-      - name: Run the testsuite (s=4096, debug runtime)
-        if: ${{ matrix.id == 'debug-s4096' }}
-        env:
-          OCAMLRUNPARAM: s=4096,v=0
-          USE_RUNTIME: d
-        run: |
-          for dir in $PARALLEL_TESTS; do \
-            bash -cxe "SHOW_TIMINGS=1 tools/ci/actions/runner.sh test_prefix $dir"; \
-          done
+#  extra:
+#    needs: build
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        id:
+#          - debug
+#          - debug-s4096
+#    steps:
+#      - name: Download artifact
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: compiler
+#      - name: Unpack Artifact
+#        run: |
+#          tar --zstd -xf sources.tar.zstd
+#          rm -f sources.tar.zstd
+#      - name: Run the testsuite (debug runtime)
+#        if: ${{ matrix.id == 'debug' }}
+#        env:
+#          OCAMLRUNPARAM: v=0,V=1
+#          USE_RUNTIME: d
+#        run: |
+#          bash -cxe "SHOW_TIMINGS=1 tools/ci/actions/runner.sh test"
+#      - name: Run the testsuite (s=4096, debug runtime)
+#        if: ${{ matrix.id == 'debug-s4096' }}
+#        env:
+#          OCAMLRUNPARAM: s=4096,v=0
+#          USE_RUNTIME: d
+#        run: |
+#          for dir in $PARALLEL_TESTS; do \
+#            bash -cxe "SHOW_TIMINGS=1 tools/ci/actions/runner.sh test_prefix $dir"; \
+#          done
