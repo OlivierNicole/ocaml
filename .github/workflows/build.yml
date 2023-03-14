@@ -121,10 +121,10 @@ jobs:
           persist-credentials: false
       - name: OS Dependencies
         if: runner.os == 'MacOS'
-        run: brew install parallel libunwind libunwind-headers
+        run: brew install parallel libunwind-headers
       - name: configure tree
         run: |
-          CONFIG_ARG=${{ matrix.config_arg }} MAKE_ARG=-j XARCH=x64 bash -xe tools/ci/actions/runner.sh configure
+          CONFIG_ARG='${{ matrix.config_arg }}' MAKE_ARG=-j XARCH=x64 bash -xe tools/ci/actions/runner.sh configure
       - name: Build
         run: |
           MAKE_ARG=-j bash -xe tools/ci/actions/runner.sh build
