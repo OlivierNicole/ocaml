@@ -42,6 +42,10 @@ let is_tmc_attribute = function
   | {txt=("tail_mod_cons"|"ocaml.tail_mod_cons")} -> true
   | _ -> false
 
+let is_tailrec_attribute = function
+  | {txt=("tailrec"|"ocaml.tailrec")} -> true
+  | _ -> false
+
 let is_poll_attribute = function
   | {txt=("poll")} -> true
   | _ -> false
@@ -309,6 +313,23 @@ let add_tmc_attribute expr loc attributes =
   else
     expr
 
+let add_tailrec_attribute expr loc attributes =
+  let is_tailrec_attribute a = is_tailrec_attribute a.Parsetree.attr_name in
+  if List.exists is_tailrec_attribute attributes then
+    match expr with
+    | Lfunction funct ->
+        if funct.attr.tailrec then
+            Location.prerr_warning loc
+              (Warnings.Duplicated_attribute "tailrec");
+        let attr = { funct.attr with tailrec = true } in
+        lfunction_with_attr ~attr funct
+    | expr ->
+        Location.prerr_warning loc
+          (Warnings.Misplaced_attribute "tailrec");
+        expr
+  else
+    expr
+
 let add_poll_attribute expr loc attributes =
   match expr, get_poll_attribute attributes with
   | expr, Default_poll -> expr
@@ -444,6 +465,9 @@ let add_function_attributes lam loc attr =
   in
   let lam =
     add_tmc_attribute lam loc attr
+  in
+  let lam =
+    add_tailrec_attribute lam loc attr
   in
   let lam =
     (* last because poll overrides inline and local *)

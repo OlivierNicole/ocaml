@@ -272,6 +272,7 @@ type function_attribute = {
   is_a_functor: bool;
   stub: bool;
   tmc_candidate: bool;
+  tailrec: bool;
 }
 
 type scoped_location = Debuginfo.Scoped_location.t

@@ -499,6 +499,7 @@ let rec compile_functor ~scopes mexp coercion root_path loc =
       is_a_functor = true;
       stub = false;
       tmc_candidate = false;
+      tailrec = false;
     }
     ~loc
     ~body
