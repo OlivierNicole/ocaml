@@ -128,10 +128,14 @@ jobs:
       - name: Build
         run: |
           V=1 MAKE_ARG=-j bash -xe tools/ci/actions/runner.sh build
+        env:
+          MallocNanoZone: 0
       - name: Run the testsuite
         if: ${{ matrix.name != 'linux-O0' }}
         run: |
           bash -c 'SHOW_TIMINGS=1 tools/ci/actions/runner.sh test'
+        env:
+          MallocNanoZone: 0
       - name: Run the testsuite (linux-O0)
         if: ${{ matrix.name == 'linux-O0' }}
         env:
