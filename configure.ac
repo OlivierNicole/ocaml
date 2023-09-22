@@ -1053,6 +1053,10 @@ AC_CHECK_HEADER([stdatomic.h], [AC_DEFINE([HAS_STDATOMIC_H])])
 
 AC_CHECK_HEADER([sys/mman.h], [AC_DEFINE([HAS_SYS_MMAN_H])])
 
+AS_CASE([$host],
+  [*-*-linux*],
+    [AC_CHECK_HEADER([linux/futex.h], [AC_DEFINE([HAS_LINUX_FUTEX_H])])])
+
 # Checks for types
 
 ## off_t
@@ -2425,11 +2429,11 @@ ocamlc_cppflags="$common_cppflags $CPPFLAGS"
 
 AS_CASE([$host],
   [*-*-mingw32*],
-    [cclibs="$cclibs -lversion"],
+    [cclibs="$cclibs -lversion -lsynchronization"],
   [*-pc-windows],
     [# For whatever reason, flexlink includes -ladvapi32 for mingw-w64, but
     # doesn't include advapi32.lib for MSVC
-    cclibs="$cclibs advapi32.lib version.lib"])
+    cclibs="$cclibs advapi32.lib version.lib synchronization.lib"])
 
 AC_CONFIG_COMMANDS_PRE([cclibs="$cclibs $mathlib $DLLIBS $PTHREAD_LIBS"])
 

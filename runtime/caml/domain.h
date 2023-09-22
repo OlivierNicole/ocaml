@@ -168,7 +168,6 @@ int caml_try_run_on_all_domains(
 
 
 /* barriers */
-typedef uintnat barrier_status;
 void caml_global_barrier(void);
 barrier_status caml_global_barrier_begin(void);
 int caml_global_barrier_is_final(barrier_status);
