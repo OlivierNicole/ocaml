@@ -185,7 +185,7 @@ header_t caml_get_header_val(value v) {
   return get_header_val(v);
 }
 
-
+CAMLno_tsan /* Disable TSan reports from this function (see #11040) */
 static int try_update_object_header(value v, volatile value *p, value result,
                                     mlsize_t infix_offset) {
   int success = 0;
