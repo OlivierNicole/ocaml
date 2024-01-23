@@ -1,6 +1,13 @@
 (* TEST
  include runtime_events;
  include unix;
+ not-windows;
+ {
+   bytecode;
+ }
+ {
+   native;
+ }
 *)
 
 (* Check that emitting a custom event from a signal handler works (see #12900).
