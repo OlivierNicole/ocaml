@@ -27,14 +27,21 @@ match (3, 2, 1) with
 ;;
 [%%expect{|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (let (*match*/278 = 3 *match*/279 = 2 *match*/280 = 1)
 ||||||| parent of 5c123dc50b (Immutable arrays)
 (let (*match*/277 = 3 *match*/278 = 2 *match*/279 = 1)
 =======
 (let (*match*/280 = 3 *match*/281 = 2 *match*/282 = 1)
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(let (*match*/280 = 3 *match*/281 = 2 *match*/282 = 1)
+=======
+(let (*match*/279 = 3 *match*/280 = 2 *match*/281 = 1)
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
     (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
       (catch (if (!= *match*/279 3) (exit 4) (exit 2)) with (4)
         (if (!= *match*/278 1) (exit 3) (exit 2)))
@@ -54,10 +61,17 @@ match (3, 2, 1) with
 =======
       (catch (if (!= *match*/281 3) (exit 3) (exit 1)) with (3)
         (if (!= *match*/280 1) (exit 2) (exit 1)))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+      (catch (if (!= *match*/281 3) (exit 3) (exit 1)) with (3)
+        (if (!= *match*/280 1) (exit 2) (exit 1)))
+=======
+      (catch (if (!= *match*/280 3) (exit 3) (exit 1)) with (3)
+        (if (!= *match*/279 1) (exit 2) (exit 1)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
      with (2) 0)
    with (1) 1))
-(let (*match*/280 = 3 *match*/281 = 2 *match*/282 = 1)
-  (catch (if (!= *match*/281 3) (if (!= *match*/280 1) 0 (exit 1)) (exit 1))
+(let (*match*/279 = 3 *match*/280 = 2 *match*/281 = 1)
+  (catch (if (!= *match*/280 3) (if (!= *match*/279 1) 0 (exit 1)) (exit 1))
    with (1) 1))
 >>>>>>> 5c123dc50b (Immutable arrays)
 - : bool = false
@@ -72,15 +86,22 @@ match (3, 2, 1) with
 ;;
 [%%expect{|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (let (*match*/283 = 3 *match*/284 = 2 *match*/285 = 1)
 ||||||| parent of 5c123dc50b (Immutable arrays)
 (let (*match*/282 = 3 *match*/283 = 2 *match*/284 = 1)
 =======
 (let (*match*/285 = 3 *match*/286 = 2 *match*/287 = 1)
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(let (*match*/285 = 3 *match*/286 = 2 *match*/287 = 1)
+=======
+(let (*match*/284 = 3 *match*/285 = 2 *match*/286 = 1)
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
     (catch
       (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
         (if (!= *match*/284 3) (exit 8)
           (let (x/287 =a (makeblock 0 *match*/283 *match*/284 *match*/285))
@@ -107,15 +128,33 @@ match (3, 2, 1) with
         (if (!= *match*/286 3) (exit 6)
           (let (x/289 =a (makeblock 0 *match*/285 *match*/286 *match*/287))
             (exit 4 x/289)))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+        (if (!= *match*/286 3) (exit 6)
+          (let (x/289 =a (makeblock 0 *match*/285 *match*/286 *match*/287))
+            (exit 4 x/289)))
+=======
+        (if (!= *match*/285 3) (exit 6)
+          (let (x/288 =a (makeblock 0 *match*/284 *match*/285 *match*/286))
+            (exit 4 x/288)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
        with (6)
-        (if (!= *match*/285 1) (exit 5)
-          (let (x/288 =a (makeblock 0 *match*/285 *match*/286 *match*/287))
-            (exit 4 x/288))))
+        (if (!= *match*/284 1) (exit 5)
+          (let (x/287 =a (makeblock 0 *match*/284 *match*/285 *match*/286))
+            (exit 4 x/287))))
      with (5) 0)
+<<<<<<< HEAD
    with (4 x/283) (seq (ignore x/283) 1)))
 (let (*match*/285 = 3 *match*/286 = 2 *match*/287 = 1)
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+   with (4 x/283) (seq (ignore x/283) 1)))
+(let (*match*/285 = 3 *match*/286 = 2 *match*/287 = 1)
+=======
+   with (4 x/282) (seq (ignore x/282) 1)))
+(let (*match*/284 = 3 *match*/285 = 2 *match*/286 = 1)
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
     (if (!= *match*/284 3)
       (if (!= *match*/283 1) 0
@@ -135,6 +174,19 @@ match (3, 2, 1) with
       (exit 4 (makeblock 0 *match*/285 *match*/286 *match*/287)))
    with (4 x/283) (seq (ignore x/283) 1)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+    (if (!= *match*/286 3)
+      (if (!= *match*/285 1) 0
+        (exit 4 (makeblock 0 *match*/285 *match*/286 *match*/287)))
+      (exit 4 (makeblock 0 *match*/285 *match*/286 *match*/287)))
+   with (4 x/283) (seq (ignore x/283) 1)))
+=======
+    (if (!= *match*/285 3)
+      (if (!= *match*/284 1) 0
+        (exit 4 (makeblock 0 *match*/284 *match*/285 *match*/286)))
+      (exit 4 (makeblock 0 *match*/284 *match*/285 *match*/286)))
+   with (4 x/282) (seq (ignore x/282) 1)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool = false
 |}];;
 
@@ -145,6 +197,7 @@ let _ = fun a b ->
   | ((false, _) as _g) -> ()
 [%%expect{|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function a/288[int] b/289 : int 0)
 (function a/288[int] b/289 : int 0)
 ||||||| parent of 5c123dc50b (Immutable arrays)
@@ -154,6 +207,13 @@ let _ = fun a b ->
 (function a/290[int] b/291 : int 0)
 (function a/290[int] b/291 : int 0)
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/290[int] b/291 : int 0)
+(function a/290[int] b/291 : int 0)
+=======
+(function a/289[int] b/290 : int 0)
+(function a/289[int] b/290 : int 0)
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> unit = <fun>
 |}];;
 
@@ -173,6 +233,7 @@ let _ = fun a b -> match a, b with
 (* outside, trivial *)
 [%%expect {|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function a/292[int] b/293 (let (p/294 =a (makeblock 0 a/292 b/293)) p/294))
 (function a/292[int] b/293 (makeblock 0 a/292 b/293))
 ||||||| parent of 5c123dc50b (Immutable arrays)
@@ -182,6 +243,13 @@ let _ = fun a b -> match a, b with
 (function a/294[int] b/295 (let (p/296 =a (makeblock 0 a/294 b/295)) p/296))
 (function a/294[int] b/295 (makeblock 0 a/294 b/295))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/294[int] b/295 (let (p/296 =a (makeblock 0 a/294 b/295)) p/296))
+(function a/294[int] b/295 (makeblock 0 a/294 b/295))
+=======
+(function a/293[int] b/294 (let (p/295 =a (makeblock 0 a/293 b/294)) p/295))
+(function a/293[int] b/294 (makeblock 0 a/293 b/294))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> bool * 'a = <fun>
 |}]
 
@@ -190,6 +258,7 @@ let _ = fun a b -> match a, b with
 | ((false, _) as p) -> p
 (* inside, trivial *)
 [%%expect{|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/296[int] b/297 (let (p/298 =a (makeblock 0 a/296 b/297)) p/298))
 (function a/296[int] b/297 (makeblock 0 a/296 b/297))
@@ -200,6 +269,13 @@ let _ = fun a b -> match a, b with
 (function a/298[int] b/299 (let (p/300 =a (makeblock 0 a/298 b/299)) p/300))
 (function a/298[int] b/299 (makeblock 0 a/298 b/299))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/298[int] b/299 (let (p/300 =a (makeblock 0 a/298 b/299)) p/300))
+(function a/298[int] b/299 (makeblock 0 a/298 b/299))
+=======
+(function a/297[int] b/298 (let (p/299 =a (makeblock 0 a/297 b/298)) p/299))
+(function a/297[int] b/298 (makeblock 0 a/297 b/298))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> bool * 'a = <fun>
 |}];;
 
@@ -208,6 +284,7 @@ let _ = fun a b -> match a, b with
 | (false as x, _) as p -> x, p
 (* outside, simple *)
 [%%expect {|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/302[int] b/303
   (let (x/304 =a[int] a/302 p/305 =a (makeblock 0 a/302 b/303))
@@ -227,6 +304,19 @@ let _ = fun a b -> match a, b with
 (function a/304[int] b/305
   (makeblock 0 (int,*) a/304 (makeblock 0 a/304 b/305)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/304[int] b/305
+  (let (x/306 =a[int] a/304 p/307 =a (makeblock 0 a/304 b/305))
+    (makeblock 0 (int,*) x/306 p/307)))
+(function a/304[int] b/305
+  (makeblock 0 (int,*) a/304 (makeblock 0 a/304 b/305)))
+=======
+(function a/303[int] b/304
+  (let (x/305 =a[int] a/303 p/306 =a (makeblock 0 a/303 b/304))
+    (makeblock 0 (int,*) x/305 p/306)))
+(function a/303[int] b/304
+  (makeblock 0 (int,*) a/303 (makeblock 0 a/303 b/304)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> bool * (bool * 'a) = <fun>
 |}]
 
@@ -235,6 +325,7 @@ let _ = fun a b -> match a, b with
 | ((false as x, _) as p) -> x, p
 (* inside, simple *)
 [%%expect {|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/308[int] b/309
   (let (x/310 =a[int] a/308 p/311 =a (makeblock 0 a/308 b/309))
@@ -254,6 +345,19 @@ let _ = fun a b -> match a, b with
 (function a/310[int] b/311
   (makeblock 0 (int,*) a/310 (makeblock 0 a/310 b/311)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/310[int] b/311
+  (let (x/312 =a[int] a/310 p/313 =a (makeblock 0 a/310 b/311))
+    (makeblock 0 (int,*) x/312 p/313)))
+(function a/310[int] b/311
+  (makeblock 0 (int,*) a/310 (makeblock 0 a/310 b/311)))
+=======
+(function a/309[int] b/310
+  (let (x/311 =a[int] a/309 p/312 =a (makeblock 0 a/309 b/310))
+    (makeblock 0 (int,*) x/311 p/312)))
+(function a/309[int] b/310
+  (makeblock 0 (int,*) a/309 (makeblock 0 a/309 b/310)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> bool * (bool * 'a) = <fun>
 |}]
 
@@ -262,6 +366,7 @@ let _ = fun a b -> match a, b with
 | (false, x) as p -> x, p
 (* outside, complex *)
 [%%expect{|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/318[int] b/319[int]
   (if a/318
@@ -293,6 +398,27 @@ let _ = fun a b -> match a, b with
   (if a/320 (makeblock 0 (int,*) a/320 (makeblock 0 a/320 b/321))
     (makeblock 0 (int,*) b/321 (makeblock 0 a/320 b/321))))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/320[int] b/321[int]
+  (if a/320
+    (let (x/322 =a[int] a/320 p/323 =a (makeblock 0 a/320 b/321))
+      (makeblock 0 (int,*) x/322 p/323))
+    (let (x/324 =a b/321 p/325 =a (makeblock 0 a/320 b/321))
+      (makeblock 0 (int,*) x/324 p/325))))
+(function a/320[int] b/321[int]
+  (if a/320 (makeblock 0 (int,*) a/320 (makeblock 0 a/320 b/321))
+    (makeblock 0 (int,*) b/321 (makeblock 0 a/320 b/321))))
+=======
+(function a/319[int] b/320[int]
+  (if a/319
+    (let (x/321 =a[int] a/319 p/322 =a (makeblock 0 a/319 b/320))
+      (makeblock 0 (int,*) x/321 p/322))
+    (let (x/323 =a b/320 p/324 =a (makeblock 0 a/319 b/320))
+      (makeblock 0 (int,*) x/323 p/324))))
+(function a/319[int] b/320[int]
+  (if a/319 (makeblock 0 (int,*) a/319 (makeblock 0 a/319 b/320))
+    (makeblock 0 (int,*) b/320 (makeblock 0 a/319 b/320))))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> bool -> bool * (bool * bool) = <fun>
 |}]
 
@@ -303,13 +429,20 @@ let _ = fun a b -> match a, b with
 (* inside, complex *)
 [%%expect{|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function a/324[int] b/325[int]
 ||||||| parent of 5c123dc50b (Immutable arrays)
 (function a/323[int] b/324[int]
 =======
 (function a/326[int] b/327[int]
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/326[int] b/327[int]
+=======
+(function a/325[int] b/326[int]
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
     (if a/324
       (let (x/332 =a[int] a/324 p/333 =a (makeblock 0 a/324 b/325))
@@ -335,7 +468,25 @@ let _ = fun a b -> match a, b with
    with (10 x/328[int] p/329) (makeblock 0 (int,*) x/328 p/329)))
 (function a/326[int] b/327[int]
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+    (if a/326
+      (let (x/334 =a[int] a/326 p/335 =a (makeblock 0 a/326 b/327))
+        (exit 10 x/334 p/335))
+      (let (x/332 =a b/327 p/333 =a (makeblock 0 a/326 b/327))
+        (exit 10 x/332 p/333)))
+   with (10 x/328[int] p/329) (makeblock 0 (int,*) x/328 p/329)))
+(function a/326[int] b/327[int]
+=======
+    (if a/325
+      (let (x/333 =a[int] a/325 p/334 =a (makeblock 0 a/325 b/326))
+        (exit 10 x/333 p/334))
+      (let (x/331 =a b/326 p/332 =a (makeblock 0 a/325 b/326))
+        (exit 10 x/331 p/332)))
+   with (10 x/327[int] p/328) (makeblock 0 (int,*) x/327 p/328)))
+(function a/325[int] b/326[int]
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
     (if a/324 (exit 31 a/324 (makeblock 0 a/324 b/325))
       (exit 31 b/325 (makeblock 0 a/324 b/325)))
@@ -349,6 +500,15 @@ let _ = fun a b -> match a, b with
       (exit 10 b/327 (makeblock 0 a/326 b/327)))
    with (10 x/328[int] p/329) (makeblock 0 (int,*) x/328 p/329)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+    (if a/326 (exit 10 a/326 (makeblock 0 a/326 b/327))
+      (exit 10 b/327 (makeblock 0 a/326 b/327)))
+   with (10 x/328[int] p/329) (makeblock 0 (int,*) x/328 p/329)))
+=======
+    (if a/325 (exit 10 a/325 (makeblock 0 a/325 b/326))
+      (exit 10 b/326 (makeblock 0 a/325 b/326)))
+   with (10 x/327[int] p/328) (makeblock 0 (int,*) x/327 p/328)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> bool -> bool * (bool * bool) = <fun>
 |}]
 
@@ -361,6 +521,7 @@ let _ = fun a b -> match a, b with
 | (false as x, _) as p -> x, p
 (* outside, onecase *)
 [%%expect {|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/334[int] b/335[int]
   (if a/334
@@ -392,6 +553,27 @@ let _ = fun a b -> match a, b with
   (if a/336 (makeblock 0 (int,*) a/336 [0: 1 1])
     (makeblock 0 (int,*) a/336 (makeblock 0 a/336 b/337))))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/336[int] b/337[int]
+  (if a/336
+    (let (x/338 =a[int] a/336 _p/339 =a (makeblock 0 a/336 b/337))
+      (makeblock 0 (int,*) x/338 [0: 1 1]))
+    (let (x/340 =a[int] a/336 p/341 =a (makeblock 0 a/336 b/337))
+      (makeblock 0 (int,*) x/340 p/341))))
+(function a/336[int] b/337[int]
+  (if a/336 (makeblock 0 (int,*) a/336 [0: 1 1])
+    (makeblock 0 (int,*) a/336 (makeblock 0 a/336 b/337))))
+=======
+(function a/335[int] b/336[int]
+  (if a/335
+    (let (x/337 =a[int] a/335 _p/338 =a (makeblock 0 a/335 b/336))
+      (makeblock 0 (int,*) x/337 [0: 1 1]))
+    (let (x/339 =a[int] a/335 p/340 =a (makeblock 0 a/335 b/336))
+      (makeblock 0 (int,*) x/339 p/340))))
+(function a/335[int] b/336[int]
+  (if a/335 (makeblock 0 (int,*) a/335 [0: 1 1])
+    (makeblock 0 (int,*) a/335 (makeblock 0 a/335 b/336))))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> bool -> bool * (bool * bool) = <fun>
 |}]
 
@@ -400,6 +582,7 @@ let _ = fun a b -> match a, b with
 | ((false as x, _) as p) -> x, p
 (* inside, onecase *)
 [%%expect{|
+<<<<<<< HEAD
 <<<<<<< HEAD
 (function a/340[int] b/341
   (let (x/342 =a[int] a/340 p/343 =a (makeblock 0 a/340 b/341))
@@ -419,6 +602,19 @@ let _ = fun a b -> match a, b with
 (function a/342[int] b/343
   (makeblock 0 (int,*) a/342 (makeblock 0 a/342 b/343)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/342[int] b/343
+  (let (x/344 =a[int] a/342 p/345 =a (makeblock 0 a/342 b/343))
+    (makeblock 0 (int,*) x/344 p/345)))
+(function a/342[int] b/343
+  (makeblock 0 (int,*) a/342 (makeblock 0 a/342 b/343)))
+=======
+(function a/341[int] b/342
+  (let (x/343 =a[int] a/341 p/344 =a (makeblock 0 a/341 b/342))
+    (makeblock 0 (int,*) x/343 p/344)))
+(function a/341[int] b/342
+  (makeblock 0 (int,*) a/341 (makeblock 0 a/341 b/342)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> 'a -> bool * (bool * 'a) = <fun>
 |}]
 
@@ -436,13 +632,20 @@ let _ =fun a b -> match a, b with
 (* outside, tuplist *)
 [%%expect {|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function a/353[int] b/354
 ||||||| parent of 5c123dc50b (Immutable arrays)
 (function a/352[int] b/353
 =======
 (function a/355[int] b/356
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/355[int] b/356
+=======
+(function a/354[int] b/355
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
     (if a/353 (if b/354 (let (p/355 =a (field_imm 0 b/354)) p/355) (exit 42))
       (exit 42))
@@ -459,12 +662,29 @@ let _ =fun a b -> match a, b with
    with (12) (makeblock 0 a/352 b/353)))
 =======
     (if a/355 (if b/356 (let (p/357 =a (field_imm 0 b/356)) p/357) (exit 12))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+    (if a/355 (if b/356 (let (p/357 =a (field_imm 0 b/356)) p/357) (exit 12))
+=======
+    (if a/354 (if b/355 (let (p/356 =a (field_imm 0 b/355)) p/356) (exit 12))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
       (exit 12))
+<<<<<<< HEAD
    with (12) (let (p/358 =a (makeblock 0 a/355 b/356)) p/358)))
 (function a/355[int] b/356
   (catch (if a/355 (if b/356 (field_imm 0 b/356) (exit 12)) (exit 12))
    with (12) (makeblock 0 a/355 b/356)))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+   with (12) (let (p/358 =a (makeblock 0 a/355 b/356)) p/358)))
+(function a/355[int] b/356
+  (catch (if a/355 (if b/356 (field_imm 0 b/356) (exit 12)) (exit 12))
+   with (12) (makeblock 0 a/355 b/356)))
+=======
+   with (12) (let (p/357 =a (makeblock 0 a/354 b/355)) p/357)))
+(function a/354[int] b/355
+  (catch (if a/354 (if b/355 (field_imm 0 b/355) (exit 12)) (exit 12))
+   with (12) (makeblock 0 a/354 b/355)))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> bool tuplist -> bool * bool tuplist = <fun>
 |}]
 
@@ -474,14 +694,21 @@ let _ = fun a b -> match a, b with
 (* inside, tuplist *)
 [%%expect{|
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function a/357[int] b/358
 ||||||| parent of 5c123dc50b (Immutable arrays)
 (function a/356[int] b/357
 =======
 (function a/359[int] b/360
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+(function a/359[int] b/360
+=======
+(function a/358[int] b/359
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
     (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
       (if a/357
         (if b/358 (let (p/362 =a (field_imm 0 b/358)) (exit 46 p/362))
@@ -501,14 +728,32 @@ let _ = fun a b -> match a, b with
 =======
       (if a/359
         (if b/360 (let (p/364 =a (field_imm 0 b/360)) (exit 13 p/364))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+      (if a/359
+        (if b/360 (let (p/364 =a (field_imm 0 b/360)) (exit 13 p/364))
+=======
+      (if a/358
+        (if b/359 (let (p/363 =a (field_imm 0 b/359)) (exit 13 p/363))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
           (exit 14))
         (exit 14))
+<<<<<<< HEAD
      with (14) (let (p/363 =a (makeblock 0 a/359 b/360)) (exit 13 p/363)))
    with (13 p/361) p/361))
 (function a/359[int] b/360
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+     with (14) (let (p/363 =a (makeblock 0 a/359 b/360)) (exit 13 p/363)))
+   with (13 p/361) p/361))
+(function a/359[int] b/360
+=======
+     with (14) (let (p/362 =a (makeblock 0 a/358 b/359)) (exit 13 p/362)))
+   with (13 p/360) p/360))
+(function a/358[int] b/359
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
   (catch
     (catch
+<<<<<<< HEAD
 <<<<<<< HEAD
       (if a/357 (if b/358 (exit 46 (field_imm 0 b/358)) (exit 47)) (exit 47))
      with (47) (exit 46 (makeblock 0 a/357 b/358)))
@@ -522,5 +767,14 @@ let _ = fun a b -> match a, b with
      with (14) (exit 13 (makeblock 0 a/359 b/360)))
    with (13 p/361) p/361))
 >>>>>>> 5c123dc50b (Immutable arrays)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+      (if a/359 (if b/360 (exit 13 (field_imm 0 b/360)) (exit 14)) (exit 14))
+     with (14) (exit 13 (makeblock 0 a/359 b/360)))
+   with (13 p/361) p/361))
+=======
+      (if a/358 (if b/359 (exit 13 (field_imm 0 b/359)) (exit 14)) (exit 14))
+     with (14) (exit 13 (makeblock 0 a/358 b/359)))
+   with (13 p/360) p/360))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 - : bool -> bool tuplist -> bool * bool tuplist = <fun>
 |}]

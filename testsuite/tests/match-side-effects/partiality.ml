@@ -40,6 +40,7 @@ as partial, even if it appears to be total. It may generate a Match_failure
 exception. This typically occurs due to complex matches on mutable fields.
 (see manual section 13.5.5)
 (let
+<<<<<<< HEAD
   (f/281 =
      (function x/283 : int
        (if (field_int 0 x/283)
@@ -48,12 +49,43 @@ exception. This typically occurs due to complex matches on mutable fields.
              (if (seq (setfield_ptr 1 x/283 0) 0) 2
                (let (*match*/288 =o (field_mut 1 x/283))
                  (if *match*/288 (field_imm 0 *match*/288)
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (f/280 =
+     (function x/282 : int
+       (if (field_int 0 x/282)
+         (let (*match*/286 =o (field_mut 1 x/282))
+           (if *match*/286
+             (if (seq (setfield_ptr 1 x/282 0) 0) 2
+               (let (*match*/287 =o (field_mut 1 x/282))
+                 (if *match*/287 (field_imm 0 *match*/287)
+=======
+  (f/282 =
+     (function x/284 : int
+       (if (field_int 0 x/284)
+         (let (*match*/288 =o (field_mut 1 x/284))
+           (if *match*/288
+             (if (seq (setfield_ptr 1 x/284 0) 0) 2
+               (let (*match*/289 =o (field_mut 1 x/284))
+                 (if *match*/289 (field_imm 0 *match*/289)
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
                    (raise
+<<<<<<< HEAD
                      (makeblock 0 (global Match_failure/20!) [0: "" 4 2])))))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+                     (makeblock 0 (global Match_failure/18!) [0: "" 4 2])))))
+=======
+                     (makeblock 0 (global Match_failure/19!) [0: "" 4 2])))))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
              1))
          0)))
+<<<<<<< HEAD
   (apply (field_mut 1 (global Toploop!)) "f" f/281))
 
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (apply (field_mut 1 (global Toploop!)) "f" f/280))
+=======
+  (apply (field_mut 1 (global Toploop!)) "f" f/282))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val f : t -> int = <fun>
 |}]
 
@@ -73,6 +105,7 @@ let simple x =
 0
 type t = { a : bool; mutable b : int option; }
 (let
+<<<<<<< HEAD
   (simple/292 =
      (function x/294 : int
        (let (*match*/297 =o (field_mut 1 x/294))
@@ -113,9 +146,28 @@ exception. This typically occurs due to complex matches on mutable fields.
                (if *match*/304
                  (raise (makeblock 0 (global Match_failure/20!) [0: "" 2 2]))
                  1))))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (f/291 =
+     (function x/292 : int
+       (if (field_int 0 x/292)
+         (let (*match*/296 =o (field_mut 1 x/292))
+           (if *match*/296 (field_imm 0 *match*/296) 1))
+=======
+  (f/293 =
+     (function x/294 : int
+       (if (field_int 0 x/294)
+         (let (*match*/298 =o (field_mut 1 x/294))
+           (if *match*/298 (field_imm 0 *match*/298) 1))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
          0)))
+<<<<<<< HEAD
   (apply (field_mut 1 (global Toploop!)) "f" f/298))
 
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (apply (field_mut 1 (global Toploop!)) "f" f/291))
+=======
+  (apply (field_mut 1 (global Toploop!)) "f" f/293))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val f : t -> int = <fun>
 |}]
 
@@ -146,10 +198,21 @@ as partial, even if it appears to be total. It may generate a Match_failure
 exception. This typically occurs due to complex matches on mutable fields.
 (see manual section 13.5.5)
 (let
+<<<<<<< HEAD
   (f/305 =
      (function r/306 : int
        (let (*match*/308 = (makeblock 0 r/306))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (f/298 =
+     (function r/299 : int
+       (let (*match*/301 = (makeblock 0 r/299))
+=======
+  (f/300 =
+     (function r/301 : int
+       (let (*match*/303 = (makeblock 0 r/301))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
          (catch
+<<<<<<< HEAD
            (if *match*/308
              (let (*match*/310 =o (field_mut 0 (field_imm 0 *match*/308)))
                (if *match*/310 (exit 13) 0))
@@ -161,9 +224,36 @@ exception. This typically occurs due to complex matches on mutable fields.
                  (if *match*/312 (field_imm 0 *match*/312)
                    (raise
                      (makeblock 0 (global Match_failure/20!) [0: "" 2 2]))))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+           (if *match*/301
+             (let (*match*/303 =o (field_mut 0 (field_imm 0 *match*/301)))
+               (if *match*/303 (exit 7) 0))
+             (exit 7))
+          with (7)
+           (if (seq (setfield_ptr 0 r/299 0) 0) 1
+             (if *match*/301
+               (let (*match*/305 =o (field_mut 0 (field_imm 0 *match*/301)))
+                 (field_imm 0 *match*/305))
+=======
+           (if *match*/303
+             (let (*match*/305 =o (field_mut 0 (field_imm 0 *match*/303)))
+               (if *match*/305 (exit 7) 0))
+             (exit 7))
+          with (7)
+           (if (seq (setfield_ptr 0 r/301 0) 0) 1
+             (if *match*/303
+               (let (*match*/307 =o (field_mut 0 (field_imm 0 *match*/303)))
+                 (field_imm 0 *match*/307))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
                3))))))
+<<<<<<< HEAD
   (apply (field_mut 1 (global Toploop!)) "f" f/305))
 
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (apply (field_mut 1 (global Toploop!)) "f" f/298))
+=======
+  (apply (field_mut 1 (global Toploop!)) "f" f/300))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val f : int option ref -> int = <fun>
 |}]
 
@@ -183,10 +273,22 @@ let test = function
 0
 type _ t = Int : int -> int t | Bool : bool -> bool t
 (let
+<<<<<<< HEAD
   (test/316 =
      (function param/319 : int
        (if param/319 (field_imm 0 (field_imm 0 param/319)) 0)))
   (apply (field_mut 1 (global Toploop!)) "test" test/316))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (test/309 =
+     (function param/312 : int
+       (if param/312 (field_imm 0 (field_imm 0 param/312)) 0)))
+  (apply (field_mut 1 (global Toploop!)) "test" test/309))
+=======
+  (test/311 =
+     (function param/314 : int
+       (if param/314 (field_imm 0 (field_imm 0 param/314)) 0)))
+  (apply (field_mut 1 (global Toploop!)) "test" test/311))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val test : int t option -> int = <fun>
 |}]
 
@@ -204,11 +306,25 @@ let test = function
 0
 type _ t = Int : int -> int t | Bool : bool -> bool t
 (let
+<<<<<<< HEAD
   (test/324 =
      (function param/326 : int
        (let (*match*/327 =o (field_mut 0 param/326))
          (if *match*/327 (field_imm 0 (field_imm 0 *match*/327)) 0))))
   (apply (field_mut 1 (global Toploop!)) "test" test/324))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (test/317 =
+     (function param/319 : int
+       (let (*match*/320 =o (field_mut 0 param/319))
+         (if *match*/320 (field_imm 0 (field_imm 0 *match*/320)) 0))))
+  (apply (field_mut 1 (global Toploop!)) "test" test/317))
+=======
+  (test/319 =
+     (function param/321 : int
+       (let (*match*/322 =o (field_mut 0 param/321))
+         (if *match*/322 (field_imm 0 (field_imm 0 *match*/322)) 0))))
+  (apply (field_mut 1 (global Toploop!)) "test" test/319))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val test : int t option ref -> int = <fun>
 |}]
 
@@ -229,19 +345,57 @@ let test n =
 0
 type _ t = Int : int -> int t | Bool : bool -> bool t
 (let
+<<<<<<< HEAD
   (test/332 =
      (function n/333 : int
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (test/325 =
+     (function n/326 : int
+=======
+  (test/327 =
+     (function n/328 : int
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
        (let
+<<<<<<< HEAD
          (*match*/336 =
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+         (*match*/329 =
+=======
+         (*match*/331 =
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
             (makeblock 0 (makeblock 0 (makemutable 0 (int) 1) [0: 42])))
+<<<<<<< HEAD
          (if *match*/336
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+         (if *match*/329
+=======
+         (if *match*/331
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
            (let
+<<<<<<< HEAD
              (*match*/337 =a (field_imm 0 *match*/336)
               *match*/339 =o (field_mut 0 (field_imm 0 *match*/337)))
              (if *match*/339 (field_imm 0 (field_imm 1 *match*/337))
                (~ (field_imm 0 (field_imm 1 *match*/337)))))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+             (*match*/330 =a (field_imm 0 *match*/329)
+              *match*/332 =o (field_mut 0 (field_imm 0 *match*/330)))
+             (if *match*/332 (field_imm 0 (field_imm 1 *match*/330))
+               (~ (field_imm 0 (field_imm 1 *match*/330)))))
+=======
+             (*match*/332 =a (field_imm 0 *match*/331)
+              *match*/334 =o (field_mut 0 (field_imm 0 *match*/332)))
+             (if *match*/334 (field_imm 0 (field_imm 1 *match*/332))
+               (~ (field_imm 0 (field_imm 1 *match*/332)))))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
            3))))
+<<<<<<< HEAD
   (apply (field_mut 1 (global Toploop!)) "test" test/332))
+||||||| parent of 3b8d1ddfc8 (Immutable array tests)
+  (apply (field_mut 1 (global Toploop!)) "test" test/325))
+=======
+  (apply (field_mut 1 (global Toploop!)) "test" test/327))
+>>>>>>> 3b8d1ddfc8 (Immutable array tests)
 val test : 'a -> int = <fun>
 |}]
 
