@@ -137,6 +137,15 @@ type type_desc =
   | Tpackage of Path.t * (string list * type_expr) list
   (** Type of a first-class module (a.k.a package). *)
 
+(** This is used in the Typedtree. It is distinct from
+    {{!Asttypes.arg_label}[arg_label]} because Position argument labels are
+    discovered through typechecking. *)
+and arg_label =
+  | Nolabel
+  | Labelled of string (** [label:T -> ...] *)
+  | Optional of string (** [?label:T -> ...] *)
+  | Position of string (** [label:[%call_pos] -> ...] *)
+
 and fixed_explanation =
   | Univar of type_expr (** The row type was bound to an univar *)
   | Fixed_private (** The row type is private *)

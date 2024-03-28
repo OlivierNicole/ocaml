@@ -203,6 +203,7 @@ type error =
   | Missing_type_constraint
   | Wrong_expected_kind of wrong_kind_sort * wrong_kind_context * type_expr
   | Expr_not_a_record_type of type_expr
+  | Invalid_label_for_src_pos of arg_label
   | Constructor_labeled_arg
   | Partial_tuple_pattern_bad_type
   | Extra_tuple_label of string option * type_expr
@@ -362,6 +363,15 @@ let is_iarray_type env ty =
 
 let protect_expansion env ty =
   if Env.has_local_constraints env then generic_instance ty else ty
+
+let src_pos loc attrs env =
+  { exp_desc = Texp_src_pos
+  ; exp_loc = loc
+  ; exp_extra = []
+  ; exp_type = instance Predef.type_lexing_position
+  ; exp_attributes = attrs
+  ; exp_env = env
+  }
 
 type record_extraction_result =
   | Record_type of Path.t * Path.t * Types.label_declaration list
@@ -2813,6 +2823,7 @@ type untyped_apply_arg =
        a fresh type variable. *)
   | Eliminated_optional_arg of
       {
+        expected_label : arg_label;
         ty_arg : type_expr;
         level: int;
       }
@@ -2857,7 +2868,7 @@ let previous_arg_loc rev_args ~funct =
 let collect_unknown_apply_args env funct ty_fun0 rev_args sargs =
   let labels_match ~param ~arg =
     param = arg
-    || !Clflags.classic && arg = Nolabel && not (is_optional param)
+    || !Clflags.classic && arg = Nolabel && not (is_omittable param)
   in
   let has_label l ty_fun =
     let ls, tvar = list_labels env ty_fun in
@@ -2935,25 +2946,26 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
       begin
         let name = label_name l
         and optional = is_optional l in
+        and omittable = is_omittable l in
         let remaining_sargs, arg_opt =
           if ignore_labels then begin
             (* No reordering is allowed, process arguments in order *)
             match sargs with
             | [] -> assert false
             | (l', sarg) :: remaining_sargs ->
-                if name = label_name l' || (not optional && l' = Nolabel) then
-                  (remaining_sargs, Some (sarg, l'))
+                if name = label_name l' || (not omittable && l' = Nolabel) then
+                  (remaining_sargs, Right (sarg, l'))
                 else if
-                  optional &&
+                  omittable &&
                   not (List.exists (fun (l, _) -> name = label_name l)
                         remaining_sargs) &&
                   List.exists (function (Nolabel, _) -> true | _ -> false)
                     sargs
                 then
-                  (sargs, None)
+                  (sargs, Left l)
                 else
                   raise(Error(sarg.pexp_loc, env,
-                              Apply_wrong_label(l', ty_fun', optional)))
+                              Apply_wrong_label(l', ty_fun', omittable)))
           end else
             (* Arguments can be commuted, try to fetch the argument
               corresponding to the first parameter. *)
@@ -2968,23 +2980,23 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
                     (Warnings.Nonoptional_label (Asttypes.string_of_label l));
                 remaining_sargs, Some (sarg, l')
             | None ->
-                sargs, None
+                sargs, Left l
         in
         match arrow_kind with
         | `Arrow (ty_arg, ty_ret, ty_arg0, ty_ret0) ->
             let arg =
               match arg_opt with
-              | Some (sarg, l') ->
+              | Right (sarg, l') ->
                   let wrapped_in_some = optional && not (is_optional l') in
                   if wrapped_in_some then
                     may_warn sarg.pexp_loc
                       (not_principal "using an optional argument here");
                   Arg (Known_arg { sarg; ty_arg; ty_arg0; wrapped_in_some })
-              | None ->
-                  if optional && List.mem_assoc Nolabel sargs then begin
+              | Left expected_label ->
+                  if omittable && List.mem_assoc Nolabel sargs then begin
                     may_warn funct.exp_loc (Warnings.Non_principal_labels
-                                                "eliminated optional argument");
-                    Arg (Eliminated_optional_arg { ty_arg; level = lv })
+                                                "eliminated omittable argument");
+                    Arg (Eliminated_optional_arg { ty_arg; level = lv; expected_label })
                   end else begin
                     (* No argument was given for this parameter, we abstract
                       over it. *)
@@ -3184,6 +3196,7 @@ let check_recursive_class_bindings env ids exprs =
 let rec approx_type env sty =
   match sty.ptyp_desc with
     Ptyp_arrow (p, _, sty) ->
+      let p = Typetexp.transl_label p (Some arg_sty) in
       let ty1 = if is_optional p then type_option (newvar ()) else newvar () in
       newty (Tarrow (p, ty1, approx_type env sty, commu_ok))
   | Ptyp_tuple args ->
@@ -3273,6 +3286,7 @@ and type_approx_function env params c body ~loc =
   *)
   match params with
   | { pparam_desc = Pparam_val (label, default, pat) } :: params ->
+      let label, pat = Typetexp.transl_label_from_pat label pat in
       type_approx_fun env label default pat
         (type_approx_function env params c body ~loc)
   | { pparam_desc = Pparam_newtype _ } :: _ ->
@@ -5147,8 +5161,9 @@ and type_function
   | { pparam_desc = Pparam_val (arg_label, default_arg, pat); pparam_loc }
       :: rest
     ->
+      let typed_arg_label, pat = Typetexp.transl_label_from_pat arg_label pat in
       let ty_arg, ty_res =
-        split_function_ty env ty_expected ~arg_label ~first ~in_function
+        split_function_ty env ty_expected ~arg_label:typed_arg_label ~first ~in_function
       in
       (* [ty_arg_internal] is the type of the parameter viewed internally
          to the function. This is different than [ty_arg] exactly for
@@ -5206,7 +5221,7 @@ and type_function
            | ([] | _ :: _ :: _), _ -> assert false
       in
       let exp_type =
-        instance (newgenty (Tarrow (arg_label, ty_arg, ty_res, commu_ok)))
+        instance (newgenty (Tarrow (typed_arg_label, ty_arg, ty_res, commu_ok)))
       in
       (* This is quadratic, as it operates over the entire tail of the
          type for each new parameter. Now that functions are n-ary, we
@@ -5222,11 +5237,14 @@ and type_function
         let ls, tvar = list_labels env ty in
         List.for_all (( <> ) Nolabel) ls && not tvar
       in
-      if is_optional arg_label && not_nolabel_function ty_res
-      then
-        Location.prerr_warning
-          pat.pat_loc
-          Warnings.Unerasable_optional_argument;
+      if not_nolabel_function ty_res then
+        if is_optional typed_arg_label then
+          Location.prerr_warning
+            pat.pat_loc
+            Warnings.Unerasable_optional_argument
+        else if is_position typed_arg_label then
+          Location.prerr_warning pat.pat_loc
+            Warnings.Unerasable_position_argument;
       let fp_kind, fp_param =
         match default_arg with
         | None ->
@@ -5238,7 +5256,7 @@ and type_function
       in
       let param =
         { fp_kind;
-          fp_arg_label = arg_label;
+          fp_arg_label = typed_arg_label;
           fp_param;
           fp_partial = partial;
           fp_newtypes = newtypes;
@@ -5652,7 +5670,7 @@ and type_argument ?explanation ?recarg env sarg ty_expected' ty_expected =
   in
   match may_coerce with
     Some (safe_expect, lv) ->
-      (* apply optional arguments when expected type is "" *)
+      (* apply omittable arguments when expected type is "" *)
       (* we must be very careful about not breaking the semantics *)
       let texp =
         with_local_level_generalize_structure_if_principal
@@ -5663,6 +5681,9 @@ and type_argument ?explanation ?recarg env sarg ty_expected' ty_expected =
         | Tarrow (l,ty_arg,ty_fun,_) when is_optional l ->
             let ty = option_none env (instance ty_arg) sarg.pexp_loc in
             make_args ((l, Arg ty) :: args) ty_fun
+        | Tarrow (l, ty_arg, ty_fun, _) when is_position l ->
+            let arg = src_pos (Location.ghostify sarg.pexp_loc) [] env in
+            make_args ((l, Arg arg) :: args) ty_fun
         | Tarrow (l,_,ty_res',_) when l = Nolabel || !Clflags.classic ->
             List.rev args, ty_fun, no_labels ty_res'
         | Tvar _ ->  List.rev args, ty_fun, false
@@ -5729,7 +5750,7 @@ and type_argument ?explanation ?recarg env sarg ty_expected' ty_expected =
         (Warnings.Eliminated_optional_arguments
            (List.map (fun (l, _) -> Asttypes.string_of_label l) args));
       if warn then Location.prerr_warning texp.exp_loc
-          (Warnings.Non_principal_labels "eliminated optional argument");
+          (Warnings.Non_principal_labels "eliminated omittable argument");
       (* let-expand to have side effects *)
       let let_pat, let_var = var_pair "arg" texp.exp_type in
       re { texp with exp_type = ty_fun; exp_desc =
@@ -5763,11 +5784,15 @@ and type_apply_arg env (lbl, arg) =
           type_argument env sarg ty_arg ty_arg0
       in
       (lbl, Arg arg)
-  | Arg (Eliminated_optional_arg { ty_arg; _ }) ->
-      let arg =
-        option_none env (instance ty_arg) Location.none
-      in
-      (lbl, Arg arg)
+  | Arg (Eliminated_optional_arg { ty_arg; expected_label; level = _ }) ->
+      (match expected_label with
+      | Optional _ ->
+          let arg = option_none env (instance ty_arg) Location.none in
+          (lbl, Arg arg)
+      | Position _ ->
+          let arg = src_pos (Location.ghostify app_loc) [] env in
+          (lbl, Arg arg)
+      | Labelled _ | Nolabel -> assert false)
   | Omitted _ as arg -> (lbl, arg)
 
 and type_application env funct sargs =
@@ -5778,7 +5803,7 @@ and type_application env funct sargs =
   in
   match sargs with
   | (* Special case for ignore: avoid discarding warning *)
-    [Nolabel, sarg] when is_ignore funct ->
+    [Parsetree.Nolabel, sarg] when is_ignore funct ->
       let ty_arg, ty_res =
         filter_arrow env (instance funct.exp_type) Nolabel in
       let exp = type_expect env sarg (mk_expected ty_arg) in
@@ -5791,9 +5816,9 @@ and type_application env funct sargs =
         begin
           let ls, tvar = list_labels env ty in
           not tvar &&
-          let labels = List.filter (fun l -> not (is_optional l)) ls in
+          let labels = List.filter (fun l -> not (is_omittable l)) ls in
           List.length labels = List.length sargs &&
-          List.for_all (fun (l,_) -> l = Nolabel) sargs &&
+          List.for_all (fun (l,_) -> l = Parsetree.Nolabel) sargs &&
           List.exists (fun l -> l <> Nolabel) labels &&
           (Location.prerr_warning
              funct.exp_loc
@@ -5808,6 +5833,13 @@ and type_application env funct sargs =
          with
            [f : a:bar -> ?opt:baz -> int -> unit] *)
       let ty_ret, args =
+        let sargs = List.map
+          (* Application will never contain Position labels, so no need to pass
+             argument type here. When checking against the function type,
+             Labelled arguments will be matched up to Position parameters
+             based on label names *)
+          (fun (label, e) -> Typetexp.transl_label label None, e) sargs
+        in
         collect_apply_args env funct ignore_labels ty (instance ty) sargs
       in
       (* example: [collect_apply_args] returns
@@ -7084,9 +7116,12 @@ let report_error ~loc env = function
   | Apply_wrong_label (l, ty, extra_info) ->
       let print_label ppf = function
         | Nolabel -> fprintf ppf "without label"
-        | l ->
+        | (Labelled _ | Optional _) as l ->
             fprintf ppf "with label %a"
               Style.inline_code (prefixed_label_name l)
+        | Position _ -> assert false
+          (* Since Position labels never occur in function applications,
+             this case is never run *)
       in
       let extra_info =
         if not extra_info then
@@ -7231,7 +7266,8 @@ let report_error ~loc env = function
   | Abstract_wrong_label {got; expected; expected_type; explanation} ->
       let label ~long ppf = function
         | Nolabel -> fprintf ppf "unlabeled"
-        | l       ->
+        | Position l -> Style.inline_code ppf "~(%s :@ [%%call_pos])" l
+        | Labelled _ | Optional _ ->
             if long then
               fprintf ppf "labeled %a" Style.inline_code (prefixed_label_name l)
             else
@@ -7241,14 +7277,24 @@ let report_error ~loc env = function
         | Nolabel, _ | _, Nolabel -> true
         | _                       -> false
       in
+      let maybe_positional_argument_hint ppf () =
+        match got, expected with
+        | Labelled _, Position _ ->
+            fprintf
+              ppf
+              "\nHint: Consider explicitly annotating the label with %a"
+              Style.inline_code "[%call_pos]"
+        | _ -> ()
+      in
       Location.errorf ~loc
         "@[<v>@[<2>This function should have type@ %a%a@]@,\
-         @[but its first argument is %a@ instead of %s%a@]@]"
+         @[but its first argument is %a@ instead of %s%a@]%a@]"
         (Style.as_inline_code Printtyp.type_expr) expected_type
         pp_doc (report_type_expected_explanation_opt explanation)
         (label ~long:true) got
         (if second_long then "being " else "")
         (label ~long:second_long) expected
+        maybe_positional_argument_hint ()
   | Scoping_let_module(id, ty) ->
       Location.errorf ~loc
         "This %a expression has type@ %a@ \

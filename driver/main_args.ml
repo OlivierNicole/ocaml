@@ -319,6 +319,9 @@ let mk_app_funct f =
 let mk_no_app_funct f =
   "-no-app-funct", Arg.Unit f, " Deactivate applicative functors"
 
+let mk_directory f =
+  "-directory", Arg.String f, " Directory to use for debug reporting like source code location reporting"
+
 let mk_no_check_prims f =
   "-no-check-prims", Arg.Unit f, " Do not check runtime for primitives"
 
@@ -1085,6 +1088,7 @@ struct
     mk_no_alias_deps F._no_alias_deps;
     mk_app_funct F._app_funct;
     mk_no_app_funct F._no_app_funct;
+    mk_directory F._directory;
     mk_no_check_prims F._no_check_prims;
     mk_noassert F._noassert;
     mk_noautolink_byt F._noautolink;
@@ -1297,6 +1301,7 @@ struct
     mk_linscan F._linscan;
     mk_app_funct F._app_funct;
     mk_no_app_funct F._no_app_funct;
+    mk_directory F._directory;
     mk_no_float_const_prop F._no_float_const_prop;
     mk_noassert F._noassert;
     mk_noautolink_opt F._noautolink;
@@ -1625,6 +1630,7 @@ module Default = struct
     let _no_absname = clear Clflags.absname
     let _no_alias_deps = set transparent_modules
     let _no_app_funct = clear applicative_functors
+    let _directory d = Clflags.directory := Some d
     let _no_principal = clear principal
     let _no_rectypes = clear recursive_types
     let _no_strict_formats = clear strict_formats

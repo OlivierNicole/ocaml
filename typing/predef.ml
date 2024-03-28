@@ -78,6 +78,7 @@ let all_type_constrs = [
   `Extension_constructor;
   `Floatarray;
   `Iarray;
+  `Lexing_position
 ]
 
 let ident_int = ident_create "int"
@@ -100,6 +101,7 @@ and ident_string = ident_create "string"
 and ident_extension_constructor = ident_create "extension_constructor"
 and ident_floatarray = ident_create "floatarray"
 and ident_iarray = ident_create "iarray"
+and ident_lexing_position = ident_create "lexing_position"
 
 let ident_of_type_constr = function
   | `Int -> ident_int
@@ -122,6 +124,7 @@ let ident_of_type_constr = function
   | `Extension_constructor -> ident_extension_constructor
   | `Floatarray -> ident_floatarray
   | `Iarray -> ident_iarray
+  | `Lexing_position -> ident_lexing_position
 
 let path_int = Pident ident_int
 and path_char = Pident ident_char
@@ -143,6 +146,7 @@ and path_string = Pident ident_string
 and path_extension_constructor = Pident ident_extension_constructor
 and path_floatarray = Pident ident_floatarray
 and path_iarray = Pident ident_iarray
+and path_lexing_position = Pident ident_lexing_position
 
 let path_of_type_constr typ =
   Pident (ident_of_type_constr typ)
@@ -168,6 +172,7 @@ and type_string = tconstr path_string []
 and type_extension_constructor = tconstr path_extension_constructor []
 and type_floatarray = tconstr path_floatarray []
 and type_iarray t = tconstr path_iarray [t]
+and type_lexing_position = tconstr path_lexing_position []
 
 let find_type_constr =
   let all_predef_paths =
@@ -300,6 +305,7 @@ let decl_of_type_constr tconstr =
       let kind = variant [cstr ident_void []] in
       decl0 ~immediate:Always ~kind ()
   | `Exn -> decl0 ~kind:Type_open ()
+  | `Lexing_position -> decl0 ~kind:(Type_record ([ 42.; ], Record_regular)) ()
   | `Eff ->
       let kind _ = Type_open in
       decl1 ~variance:Variance.full ~kind ()

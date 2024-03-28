@@ -597,6 +597,20 @@ and transl_exp0 ~in_new_scope ~scopes e =
           Llet(pure, Pgenval, oid,
                !transl_module ~scopes Tcoerce_none None od.open_expr, body)
       end
+  | Texp_src_pos ->
+      let pos = e.exp_loc.loc_start in
+      let pos =
+          let pos_fname = Location.absolute_path pos.pos_fname in
+          { pos with pos_fname }
+      in
+      let cl =
+        [ Const_base (Const_string (pos.pos_fname, e.exp_loc, None))
+        ; Const_base (Const_int pos.pos_lnum)
+        ; Const_base (Const_int pos.pos_bol)
+        ; Const_base (Const_int pos.pos_cnum)
+        ]
+      in
+      Lconst(Const_block(0, cl))
 
 and pure_module m =
   match m.mod_desc with

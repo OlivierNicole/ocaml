@@ -47,6 +47,7 @@ type error =
   | Opened_object of Path.t option
   | Not_an_object of type_expr
   | Repeated_tuple_label of string
+  | Invalid_label_for_call_pos of Parsetree.arg_label
 
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
@@ -407,6 +408,29 @@ let type_open :
     ref =
   ref (fun ?used_slot:_ _ -> assert false)
 
+let transl_label (label : Parsetree.arg_label)
+    (arg_opt : Parsetree.core_type option) =
+  match label, arg_opt with
+  | Labelled l, Some { ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _}
+      -> Position l
+  | _, Some ({ ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _} as arg)
+      -> raise (Error (arg.ptyp_loc, Env.empty, Invalid_label_for_call_pos label))
+  | Labelled l, _ -> Labelled l
+  | Optional l, _ -> Optional l
+  | Nolabel, _ -> Nolabel
+
+let transl_label_from_pat (label : Parsetree.arg_label)
+    (pat : Parsetree.pattern) =
+  let label, inner_pat = match pat with
+  | {ppat_desc = Ppat_constraint (inner_pat, ty); _} ->
+      (* If the argument is a constraint, translate the label using the
+          type information. Otherwise, it can't be a Position argument, so
+          we don't care about the argument type *)
+      transl_label label (Some ty), inner_pat
+  | _ -> transl_label label None, pat
+  in
+  label, if Btype.is_position label then inner_pat else pat
+
 let rec transl_type env ~policy ?(aliased=false) ~row_context styp =
   Builtin_attributes.warning_scope styp.ptyp_attributes
     (fun () -> transl_type_aux env ~policy ~aliased ~row_context styp)
@@ -434,15 +458,20 @@ and transl_type_aux env ~row_context ~aliased ~policy styp =
     in
     ctyp (Ttyp_var name) ty
   | Ptyp_arrow(l, st1, st2) ->
-    let cty1 = transl_type env ~policy ~row_context st1 in
-    let cty2 = transl_type env ~policy ~row_context st2 in
-    let ty1 = cty1.ctyp_type in
-    let ty1 =
+    let l = transl_label l (Some arg_cty) in
+    let arg_cty =
+      if Btype.is_position l then
+        ctyp Ttyp_call_pos (newconstr Predef.path_lexing_position [])
+      else transl_type env ~policy ~row_context st1
+    in
+    let ret_cty = transl_type env ~policy ~row_context st2 in
+    let arg_ty = arg_cty.ctyp_type in
+    let arg_ty =
       if Btype.is_optional l
-      then newty (Tconstr(Predef.path_option,[ty1], ref Mnil))
-      else ty1 in
-    let ty = newty (Tarrow(l, ty1, cty2.ctyp_type, commu_ok)) in
-    ctyp (Ttyp_arrow (l, cty1, cty2)) ty
+      then newty (Tconstr(Predef.path_option, [arg_ty], ref Mnil))
+      else arg_ty in
+    let ty = newty (Tarrow(l, arg_ty, ret_cty.ctyp_type, commu_ok)) in
+    ctyp (Ttyp_arrow (l, arg_cty, ret_cty)) ty
   | Ptyp_tuple stl ->
     assert (List.length stl >= 2);
     Option.iter (fun l -> raise (Error (loc, env, Repeated_tuple_label l)))
@@ -978,6 +1007,12 @@ let report_error_doc env ppf = function
   | Repeated_tuple_label l ->
       fprintf ppf "@[This tuple type has two labels named %a@]"
         Style.inline_code l
+  | Invalid_label_for_call_pos arg_label ->
+      fprintf ppf "A position argument must not be %s."
+        (match arg_label with
+        | Nolabel -> "unlabelled"
+        | Optional _ -> "optional"
+        | Labelled _ -> assert false)
 
 let () =
   Location.register_error_of_exn

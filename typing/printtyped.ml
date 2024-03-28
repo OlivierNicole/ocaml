@@ -145,6 +145,7 @@ let arg_label i ppf = function
   | Nolabel -> line i ppf "Nolabel\n"
   | Optional s -> line i ppf "Optional \"%s\"\n" s
   | Labelled s -> line i ppf "Labelled \"%s\"\n" s
+  | Position s -> line i ppf "Position \"%s\"\n" s
 
 let tuple_component_label i ppf = function
   | None -> line i ppf "Label: None\n"
@@ -222,6 +223,7 @@ let rec core_type i ppf x =
   | Ttyp_open (path, _mod_ident, t) ->
       line i ppf "Ttyp_open %a\n" fmt_path path;
       core_type i ppf t
+  | Ttyp_call_pos -> line i ppf "Ttyp_call_pos\n";
 
 and labeled_core_type i ppf (l, t) =
   tuple_component_label i ppf l;

@@ -245,6 +245,7 @@ type error =
   | Missing_tuple_label of string option * type_expr
   | Repeated_tuple_exp_label of string
   | Repeated_tuple_pat_label of string
+  | Invalid_label_for_src_pos of arg_label
 
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
@@ -279,3 +280,5 @@ val annotate_recursive_bindings :
   Env.t -> Typedtree.value_binding list -> Typedtree.value_binding list
 val check_recursive_class_bindings :
   Env.t -> Ident.t list -> Typedtree.class_expr list -> unit
+
+val src_pos : Location.t -> Typedtree.attributes -> Env.t -> Typedtree.expression

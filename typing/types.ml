@@ -46,6 +46,13 @@ and type_desc =
   | Tpoly of type_expr * type_expr list
   | Tpackage of Path.t * (string list * type_expr) list
 
+and arg_label =
+  | Nolabel
+  | Labelled of string
+  | Optional of string
+  | Position of string
+
+
 and row_desc =
     { row_fields: (label * row_field) list;
       row_more: type_expr;

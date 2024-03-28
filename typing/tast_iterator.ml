@@ -611,6 +611,7 @@ let typ sub {ctyp_loc; ctyp_desc; ctyp_env; ctyp_attributes; _} =
   | Ttyp_open (_, mod_ident, t) ->
       iter_loc_lid sub mod_ident;
       sub.typ sub t
+  | Ttyp_call_pos -> ()
 
 let class_structure sub {cstr_self; cstr_fields; _} =
   sub.pat sub cstr_self;
