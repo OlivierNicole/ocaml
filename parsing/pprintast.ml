@@ -209,6 +209,27 @@ let list : 'a . ?sep:space_formatter -> ?first:space_formatter ->
           end in
     aux f xs
 
+let iarray : 'a . ?sep:space_formatter -> ?first:space_formatter ->
+  ?last:space_formatter -> (Format.formatter -> 'a -> unit) ->
+  Format.formatter -> 'a iarray -> unit
+  = fun ?sep ?first ?last fu f xs ->
+    let first = match first with Some x -> x |None -> ("": _ format6)
+    and last = match last with Some x -> x |None -> ("": _ format6)
+    and sep = match sep with Some x -> x |None -> ("@ ": _ format6) in
+    let aux f = function
+      | [: :] -> ()
+      | [: x :] -> fu f x
+      | xs ->
+          let open Iarray in
+          pp f first;
+          iter
+            (fun x -> fu f x; pp f sep)
+            (sub xs 0 (length xs - 1));
+          fu f xs.:(length xs - 1);
+          pp f last;
+    in
+    aux f xs
+
 let option : 'a. ?first:space_formatter -> ?last:space_formatter ->
   (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a option -> unit
   = fun  ?first  ?last fu f a ->
@@ -560,7 +581,7 @@ and sugar_expr ctxt f e =
   else match e.pexp_desc with
   | Pexp_apply ({ pexp_desc = Pexp_ident {txt = id; _};
                   pexp_attributes=[]; _}, args)
-    when List.for_all (fun (lab, _) -> lab = Nolabel) args -> begin
+    when Iarray.for_all (fun (lab, _) -> lab = Nolabel) args -> begin
       let print_indexop a path_prefix assign left sep right print_index indices
           rem_args =
         let print_path ppf = function
@@ -577,7 +598,7 @@ and sugar_expr ctxt f e =
                 left (list ~sep print_index) indices right
                 (simple_expr ctxt) v; true
             | _ -> false in
-      match id, List.map snd args with
+      match id, List.map snd (Iarray.to_list args) with
       | Lident "!", [e] ->
         pp f "@[<hov>!%a@]" (simple_expr ctxt) e; true
       | Ldot (path, ("get"|"set" as func)), a :: other_args -> begin
@@ -724,7 +745,7 @@ and expression ctxt f x =
             match view_fixity_of_exp e with
             | `Infix s ->
                 begin match l with
-                | [ (Nolabel, _) as arg1; (Nolabel, _) as arg2 ] ->
+                | [: (Nolabel, _) as arg1; (Nolabel, _) as arg2 :] ->
                     (* FIXME associativity label_x_expression_param *)
                     pp f "@[<2>%a@;%s@;%a@]"
                       (label_x_expression_param reset_ctxt) arg1 s
@@ -732,7 +753,7 @@ and expression ctxt f x =
                 | _ ->
                     pp f "@[<2>%a %a@]"
                       (simple_expr ctxt) e
-                      (list (label_x_expression_param ctxt)) l
+                      (iarray (label_x_expression_param ctxt)) l
                 end
             | `Prefix s ->
                 let s =
@@ -740,21 +761,21 @@ and expression ctxt f x =
                    (match l with
                     (* See #7200: avoid turning (~- 1) into (- 1) which is
                        parsed as an int literal *)
-                    |[(_,{pexp_desc=Pexp_constant _})] -> false
+                    |[: (_,{pexp_desc=Pexp_constant _}) :] -> false
                     | _ -> true)
                   then String.sub s 1 (String.length s -1)
                   else s in
                 begin match l with
-                | [(Nolabel, x)] ->
+                | [: (Nolabel, x) :] ->
                   pp f "@[<2>%s@;%a@]" s (simple_expr ctxt) x
                 | _   ->
                   pp f "@[<2>%a %a@]" (simple_expr ctxt) e
-                    (list (label_x_expression_param ctxt)) l
+                    (iarray (label_x_expression_param ctxt)) l
                 end
             | _ ->
                 pp f "@[<hov2>%a@]" begin fun f (e,l) ->
                   pp f "%a@ %a" (expression2 ctxt) e
-                    (list (label_x_expression_param reset_ctxt))  l
+                    (iarray (label_x_expression_param reset_ctxt))  l
                     (* reset here only because [function,match,try,sequence]
                        are lower priority *)
                 end (e,l)

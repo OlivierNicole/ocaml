@@ -132,6 +132,15 @@ let array i f ppf a =
     line i ppf "]\n"
   end
 
+let iarray i f ppf a =
+  if Iarray.length a = 0 then
+    line i ppf "[]\n"
+  else begin
+    line i ppf "[\n";
+    Iarray.iter (f (i+1) ppf) a;
+    line i ppf "]\n"
+  end
+
 let option i f ppf x =
   match x with
   | None -> line i ppf "None\n"
@@ -350,7 +359,7 @@ and expression i ppf x =
   | Texp_apply (e, l) ->
       line i ppf "Texp_apply\n";
       expression i ppf e;
-      list i label_x_expression ppf l;
+      iarray i label_x_expression ppf l;
   | Texp_match (e, l, partial) ->
       line i ppf "Texp_match%a\n"
         fmt_partiality partial;

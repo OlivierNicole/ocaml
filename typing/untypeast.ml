@@ -443,13 +443,14 @@ let expression sub exp =
             params
         in
         Pexp_function (params, constraint_, body)
-    | Texp_apply (exp, list) ->
+    | Texp_apply (exp, iarray) ->
         Pexp_apply (sub.expr sub exp,
-          List.fold_right (fun (label, expo) list ->
-              match expo with
-                None -> list
-              | Some exp -> (label, sub.expr sub exp) :: list
-          ) list [])
+          Iarray.of_list (
+            Iarray.fold_right (fun (label, expo) list ->
+                match expo with
+                  None -> list
+                | Some exp -> (label, sub.expr sub exp) :: list
+            ) iarray []))
     | Texp_match (exp, cases, _) ->
       Pexp_match (sub.expr sub exp, List.map (sub.case sub) cases)
     | Texp_try (exp, cases) ->

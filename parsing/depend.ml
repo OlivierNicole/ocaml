@@ -210,7 +210,7 @@ let rec add_expr bv exp =
       add_opt add_constraint bv constraint_;
       add_function_body bv body
   | Pexp_apply(e, el) ->
-      add_expr bv e; List.iter (fun (_,e) -> add_expr bv e) el
+      add_expr bv e; Iarray.iter (fun (_,e) -> add_expr bv e) el
   | Pexp_match(e, pel) -> add_expr bv e; add_cases bv pel
   | Pexp_try(e, pel) -> add_expr bv e; add_cases bv pel
   | Pexp_tuple el -> List.iter (add_expr bv) el

@@ -2546,8 +2546,13 @@ let rec is_nonexpansive exp =
   | Texp_let(_rec_flag, pat_exp_list, body) ->
       List.for_all (fun vb -> is_nonexpansive vb.vb_expr) pat_exp_list &&
       is_nonexpansive body
-  | Texp_apply(e, (_,None)::el) ->
-      is_nonexpansive e && List.for_all is_nonexpansive_opt (List.map snd el)
+  | Texp_apply(e, el)
+    when Iarray.length el > 0
+         && (match Iarray.(el.:(0)) with _,None -> true | _ -> false) ->
+      is_nonexpansive e
+      && Iarray.for_all
+           is_nonexpansive_opt
+           Iarray.(map snd (sub el 1 (length el - 1)))
   | Texp_match(e, cases, _) ->
      (* Not sure this is necessary, if [e] is nonexpansive then we shouldn't
          care if there are exception patterns. But the previous version enforced
@@ -2617,7 +2622,7 @@ let rec is_nonexpansive exp =
       { exp_desc = Texp_ident (_, _, {val_kind =
              Val_prim {Primitive.prim_name =
                          ("%raise" | "%reraise" | "%raise_notrace")}}) },
-      [Nolabel, Some e]) ->
+      [: Nolabel, Some e :]) ->
      is_nonexpansive e
   | Texp_array (_, _ :: _)
   | Texp_apply _
@@ -3479,7 +3484,7 @@ and type_expect_
           exp_env = env;
         }
   | Pexp_apply(sfunct, sargs) ->
-      assert (sargs <> []);
+      assert (sargs <> [: :]);
       let rec lower_args seen ty_fun =
         let ty = expand_head env ty_fun in
         if TypeSet.mem ty seen then () else
@@ -3508,15 +3513,15 @@ and type_expect_
         match funct.exp_desc, sargs with
         | Texp_ident (_, _,
                       {val_kind = Val_prim {prim_name="%revapply"}; val_type}),
-          [Nolabel, sarg; Nolabel, actual_sfunct]
+          [:Nolabel, sarg; Nolabel, actual_sfunct:]
           when is_inferred actual_sfunct
             && check_apply_prim_type Revapply val_type ->
-            type_sfunct actual_sfunct, [Nolabel, sarg]
+            type_sfunct actual_sfunct, [:Nolabel, sarg:]
         | Texp_ident (_, _,
                       {val_kind = Val_prim {prim_name="%apply"}; val_type}),
-          [Nolabel, actual_sfunct; Nolabel, sarg]
+          [:Nolabel, actual_sfunct; Nolabel, sarg:]
           when check_apply_prim_type Apply val_type ->
-            type_sfunct actual_sfunct, [Nolabel, sarg]
+            type_sfunct actual_sfunct, [:Nolabel, sarg:]
         | _ ->
             funct, sargs
       in
@@ -5191,7 +5196,7 @@ and type_argument ?explanation ?recarg env sarg ty_expected' ty_expected =
           {texp with exp_type = ty_res; exp_desc =
            Texp_apply
              (texp,
-              args @ [Nolabel, Some eta_var])}
+              Iarray.of_list (args @ [Nolabel, Some eta_var]))}
         in
         let cases = [ case eta_pat e ] in
         let cases_loc = { texp.exp_loc with loc_ghost = true } in
@@ -5297,8 +5302,8 @@ and type_application env funct sargs =
       let ls, tvar = list_labels env funct.exp_type in
       not tvar &&
       let labels = List.filter (fun l -> not (is_optional l)) ls in
-      List.length labels = List.length sargs &&
-      List.for_all (fun (l,_) -> l = Nolabel) sargs &&
+      List.length labels = Iarray.length sargs &&
+      Iarray.for_all (fun (l,_) -> l = Nolabel) sargs &&
       List.exists (fun l -> l <> Nolabel) labels &&
       (Location.prerr_warning
          funct.exp_loc
@@ -5315,7 +5320,7 @@ and type_application env funct sargs =
       (* We're not looking at a *known* function type anymore, or there are no
          arguments left. *)
       let ty_fun, typed_args =
-        List.fold_left type_unknown_arg (ty_fun0, args) sargs
+        List.fold_left type_unknown_arg (ty_fun0, args) (Iarray.to_list sargs)
       in
       let args =
         (* Force typing of arguments.
@@ -5328,9 +5333,9 @@ and type_application env funct sargs =
           (List.rev typed_args)
       in
       let result_ty = instance (result_type !omitted_parameters ty_fun) in
-      args, result_ty
+      Iarray.of_list args, result_ty
     in
-    if sargs = [] then type_unknown_args () else
+    if sargs = [: :] then type_unknown_args () else
     let ty_fun' = expand_head env ty_fun in
     match get_desc ty_fun', get_desc (expand_head env ty_fun0) with
     | Tarrow (l, ty, ty_fun, com), Tarrow (_, ty0, ty_fun0, _)
@@ -5367,15 +5372,17 @@ and type_application env funct sargs =
           if ignore_labels then begin
             (* No reordering is allowed, process arguments in order *)
             match sargs with
-            | [] -> assert false
-            | (l', sarg) :: remaining_sargs ->
+            | [: :] -> assert false
+            | _ ->
+                let l', sarg = Iarray.(sargs.:(0)) in
+                let remaining_sargs = Iarray.(sub sargs 1 (length sargs - 1)) in
                 if name = label_name l' || (not optional && l' = Nolabel) then
                   (remaining_sargs, Some (use_arg sarg l', Some sarg.pexp_loc))
                 else if
                   optional &&
-                  not (List.exists (fun (l, _) -> name = label_name l)
+                  not (Iarray.exists (fun (l, _) -> name = label_name l)
                          remaining_sargs) &&
-                  List.exists (function (Nolabel, _) -> true | _ -> false)
+                  Iarray.exists (function (Nolabel, _) -> true | _ -> false)
                     sargs
                 then
                   (sargs, Some (eliminate_optional_arg (), Some sarg.pexp_loc))
@@ -5385,7 +5392,7 @@ and type_application env funct sargs =
           end else
             (* Arguments can be commuted, try to fetch the argument
                corresponding to the first parameter. *)
-            match extract_label name sargs with
+            match extract_label name (Iarray.to_list sargs) with
             | Some (l', sarg, commuted, remaining_sargs) ->
                 if commuted then begin
                   may_warn sarg.pexp_loc
@@ -5394,10 +5401,14 @@ and type_application env funct sargs =
                 if not optional && is_optional l' then
                   Location.prerr_warning sarg.pexp_loc
                     (Warnings.Nonoptional_label (Printtyp.string_of_label l));
-                remaining_sargs, Some (use_arg sarg l', Some sarg.pexp_loc)
+                ( Iarray.of_list remaining_sargs,
+                  Some (use_arg sarg l', Some sarg.pexp_loc) )
             | None ->
                 sargs,
-                if optional && List.mem_assoc Nolabel sargs then
+                if optional
+                   && Iarray.exists
+                        (function Nolabel, _ -> true | _ -> false)
+                        sargs then
                   Some (eliminate_optional_arg (), None)
                 else begin
                   (* No argument was given for this parameter, we abstract over
@@ -5421,12 +5432,12 @@ and type_application env funct sargs =
   with_local_level begin fun () ->
     match sargs with
     | (* Special case for ignore: avoid discarding warning *)
-      [Nolabel, sarg] when is_ignore funct ->
+      [:Nolabel, sarg:] when is_ignore funct ->
         let ty_arg, ty_res =
           filter_arrow env (instance funct.exp_type) Nolabel in
         let exp = type_expect env sarg (mk_expected ty_arg) in
         check_partial_application ~statement:false exp;
-        ([Nolabel, Some exp], ty_res)
+        ([:Nolabel, Some exp:], ty_res)
     | _ ->
         let ty = funct.exp_type in
         type_args [] ty (instance ty) sargs

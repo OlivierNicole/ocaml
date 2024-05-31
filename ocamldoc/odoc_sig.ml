@@ -134,7 +134,7 @@ let alert_of_attribute attr =
   let alert_payload = function
     | PStr [ { pstr_desc = Pstr_eval ({ pexp_desc; _ }, _); _ } ] -> (
         match pexp_desc with
-        | Pexp_apply ({ pexp_desc = Pexp_ident name; _ }, [ (_, payload) ]) ->
+        | Pexp_apply ({ pexp_desc = Pexp_ident name; _ }, [: (_, payload) :]) ->
             Some (load_alert_name name, load_constant_string payload)
         | Pexp_ident name -> Some (load_alert_name name, None)
         | _ -> None)

@@ -116,6 +116,14 @@ let list i f ppf l =
      List.iter (f (i+1) ppf) l;
      line i ppf "]\n"
 
+let iarray i f ppf l =
+  match l with
+  | [: :] -> line i ppf "[]\n"
+  | _ ->
+     line i ppf "[\n";
+     Iarray.iter (f (i+1) ppf) l;
+     line i ppf "]\n"
+
 let option i f ppf x =
   match x with
   | None -> line i ppf "None\n"
@@ -273,10 +281,10 @@ and expression i ppf x =
       list i function_param ppf params;
       option i type_constraint ppf c;
       function_body i ppf body
-  | Pexp_apply (e, l) ->
+  | Pexp_apply (e, a) ->
       line i ppf "Pexp_apply\n";
       expression i ppf e;
-      list i label_x_expression ppf l;
+      iarray i label_x_expression ppf a;
   | Pexp_match (e, l) ->
       line i ppf "Pexp_match\n";
       expression i ppf e;

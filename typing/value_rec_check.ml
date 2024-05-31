@@ -200,7 +200,7 @@ let classify_expression : Typedtree.expression -> sd =
       when is_ref vd ->
         Static
     | Texp_apply (_,args)
-      when List.exists is_abstracted_arg args ->
+      when Iarray.exists is_abstracted_arg args ->
         Static
     | Texp_apply _ ->
         Dynamic
@@ -628,7 +628,7 @@ let rec expression : Typedtree.expression -> term_judg =
       path pth << Dereference
     | Texp_instvar (self_path, pth, _inst_var) ->
         join [path self_path << Dereference; path pth]
-    | Texp_apply ({exp_desc = Texp_ident (_, _, vd)}, [_, Some arg])
+    | Texp_apply ({exp_desc = Texp_ident (_, _, vd)}, [: (_, Some arg) :])
       when is_ref vd ->
       (*
         G |- e: m[Guard]
@@ -655,7 +655,9 @@ let rec expression : Typedtree.expression -> term_judg =
             then applied, arg :: delayed
             else arg :: applied, delayed
         in
-        let applied, delayed = split_args ~has_omitted_arg:false args in
+        let applied, delayed =
+          split_args ~has_omitted_arg:false (Iarray.to_list args)
+        in
         let function_mode =
           match applied with
           | [] -> Guard

@@ -393,8 +393,8 @@ module E = struct
         List.iter (iter_function_param sub) params;
         iter_opt (iter_constraint sub) constraint_;
         iter_body sub body
-    | Pexp_apply (e, l) ->
-        sub.expr sub e; List.iter (iter_snd (sub.expr sub)) l
+    | Pexp_apply (e, a) ->
+        sub.expr sub e; Iarray.iter (iter_snd (sub.expr sub)) a
     | Pexp_match (e, pel) ->
         sub.expr sub e; sub.cases sub pel
     | Pexp_try (e, pel) -> sub.expr sub e; sub.cases sub pel

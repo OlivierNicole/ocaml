@@ -171,6 +171,9 @@ and rewrite_labelexp_list iflag l =
 and rewrite_exp_list iflag l =
   List.iter (rewrite_exp iflag) l
 
+and rewrite_exp_iarray iflag l =
+  Iarray.iter (rewrite_exp iflag) l
+
 and rewrite_exp iflag sexp =
   if iflag then insert_profile rw_exp sexp
            else rw_exp false sexp
@@ -212,7 +215,7 @@ and rw_exp iflag sexp =
 
   | Pexp_apply(sfunct, sargs) ->
     rewrite_exp iflag sfunct;
-    rewrite_exp_list iflag (List.map snd sargs)
+    rewrite_exp_iarray iflag (Iarray.map snd sargs)
 
   | Pexp_tuple sexpl ->
     rewrite_exp_list iflag sexpl

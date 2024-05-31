@@ -211,9 +211,9 @@ and transl_exp0 ~in_new_scope ~scopes e =
       transl_function ~scopes e params body
   | Texp_apply({ exp_desc = Texp_ident(path, _, {val_kind = Val_prim p});
                 exp_type = prim_type } as funct, oargs)
-    when List.length oargs >= p.prim_arity
-    && List.for_all (fun (_, arg) -> arg <> None) oargs ->
-      let argl, extra_args = cut p.prim_arity oargs in
+    when Iarray.length oargs >= p.prim_arity
+    && Iarray.for_all (fun (_, arg) -> arg <> None) oargs ->
+      let argl, extra_args = cut p.prim_arity (Iarray.to_list oargs) in
       let arg_exps =
          List.map (function _, Some x -> x | _ -> assert false) argl
       in
@@ -239,6 +239,7 @@ and transl_exp0 ~in_new_scope ~scopes e =
       let inlined = Translattribute.get_inlined_attribute funct in
       let specialised = Translattribute.get_specialised_attribute funct in
       let e = { e with exp_desc = Texp_apply(funct, oargs) } in
+      let oargs = Iarray.to_list oargs in
       event_after ~scopes e
         (transl_apply ~scopes ~tailcall ~inlined ~specialised
            (transl_exp ~scopes funct) oargs (of_location ~scopes e.exp_loc))

@@ -354,7 +354,7 @@ let ghstr ~loc d = Str.mk ~loc:(ghost_loc loc) d
 let ghsig ~loc d = Sig.mk ~loc:(ghost_loc loc) d
 
 let mkinfix arg1 op arg2 =
-  Pexp_apply(op, [Nolabel, arg1; Nolabel, arg2])
+  Pexp_apply(op, [: Nolabel, arg1; Nolabel, arg2 :])
 
 let neg_string f =
   if String.length f > 0 && f.[0] = '-'
@@ -374,7 +374,7 @@ let mkuminus ~sloc ~oploc name arg =
     Pexp_constant({pconst_desc = Pconst_float (f, m); pconst_loc=_}), [] ->
       Pexp_constant(mkconst ~loc:sloc (Pconst_float(neg_string f, m)))
   | _ ->
-      Pexp_apply(mkoperator ~loc:oploc ("~" ^ name), [Nolabel, arg])
+      Pexp_apply(mkoperator ~loc:oploc ("~" ^ name), [: Nolabel, arg :])
 
 let mkuplus ~sloc ~oploc name arg =
   let desc = arg.pexp_desc in
@@ -387,7 +387,7 @@ let mkuplus ~sloc ~oploc name arg =
     [] ->
       Pexp_constant(mkconst ~loc:sloc desc)
   | _ ->
-      Pexp_apply(mkoperator ~loc:oploc ("~" ^ name), [Nolabel, arg])
+      Pexp_apply(mkoperator ~loc:oploc ("~" ^ name), [: Nolabel, arg :])
 
 let mk_attr ~loc name payload =
   Builtin_attributes.(register_attr Parser name);
@@ -643,7 +643,7 @@ let mk_indexop_expr array_indexing_operator ~loc
     | None -> []
     | Some expr -> [Nolabel, expr] in
   let args = (Nolabel,array) :: index @ set_arg in
-  mkexp ~loc (Pexp_apply(ghexp ~loc (Pexp_ident fn), args))
+  mkexp ~loc (Pexp_apply(ghexp ~loc (Pexp_ident fn), Iarray.of_list args))
 
 let indexop_unclosed_error loc_s s loc_e =
   let left, right = paren_to_strings s in
@@ -11081,7 +11081,7 @@ module Tables = struct
               in
               
 # 2533 "parsing/parser.mly"
-      ( Pexp_apply(_1, _2) )
+      ( Pexp_apply(_1, Iarray.of_list _2) )
 # 11086 "parsing/parser.ml"
               
             in
@@ -49132,7 +49132,7 @@ module Tables = struct
               in
               
 # 2626 "parsing/parser.mly"
-      ( Pexp_apply(_1, [Nolabel,_2]) )
+      ( Pexp_apply(_1, [: Nolabel,_2 :]) )
 # 49137 "parsing/parser.ml"
               
             in
@@ -49199,7 +49199,7 @@ module Tables = struct
               in
               
 # 2628 "parsing/parser.mly"
-      ( Pexp_apply(_1, [Nolabel,_2]) )
+      ( Pexp_apply(_1, [: Nolabel,_2 :]) )
 # 49204 "parsing/parser.ml"
               
             in

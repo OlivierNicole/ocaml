@@ -357,10 +357,10 @@ let expr sub x =
         let params = List.map (function_param sub) params in
         let body = function_body sub body in
         Texp_function (params, body)
-    | Texp_apply (exp, list) ->
+    | Texp_apply (exp, iarray) ->
         Texp_apply (
           sub.expr sub exp,
-          List.map (tuple2 id (Option.map (sub.expr sub))) list
+          Iarray.map (tuple2 id (Option.map (sub.expr sub))) iarray
         )
     | Texp_match (exp, cases, p) ->
         Texp_match (
