@@ -512,7 +512,8 @@ TOOLS_TO_INSTALL_NAT = ocamldep ocamlobjinfo
 
 # Tools to be compiled to bytecode only, then installed
 TOOLS_TO_INSTALL_BYT = \
-  ocamlcmt ocamlprof ocamlcp ocamlmklib ocamlmktop
+  ocamlcmt ocamlprof ocamlcp ocamlmklib ocamlmktop \
+  findapply # TMP
 
 ifeq "$(NATIVE_COMPILER)" "true"
 TOOLS_TO_INSTALL_BYT += ocamloptp
@@ -2279,6 +2280,10 @@ ocamlmktop_SOURCES = \
 
 ocamlcmt_LIBRARIES = $(addprefix compilerlibs/,ocamlcommon ocamlbytecomp)
 ocamlcmt_SOURCES = tools/ocamlcmt.mli tools/ocamlcmt.ml
+
+# TMP: printing function applications
+findapply_LIBRARIES = $(addprefix compilerlibs/,ocamlcommon ocamlbytecomp)
+findapply_SOURCES = tools/findapply.mli tools/findapply.ml
 
 # The bytecode disassembler
 
