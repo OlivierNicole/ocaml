@@ -5320,7 +5320,7 @@ and type_application env funct sargs =
       (* We're not looking at a *known* function type anymore, or there are no
          arguments left. *)
       let ty_fun, typed_args =
-        List.fold_left type_unknown_arg (ty_fun0, args) (Iarray.to_list sargs)
+        Iarray.fold_left type_unknown_arg (ty_fun0, args) sargs
       in
       let args =
         (* Force typing of arguments.
