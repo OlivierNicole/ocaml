@@ -26,6 +26,7 @@ let set r x = ignore (exchange r x)
 let incr r = ignore (fetch_and_add r 1)
 let decr r = ignore (fetch_and_add r (-1))
 
+(*
 module Array = struct
   external get : 'a array -> int -> 'a = "%array_atomic_safe_get"
   external unsafe_get : 'a array -> int -> 'a = "%array_atomic_unsafe_get"
@@ -41,3 +42,4 @@ module Array = struct
   external compare_and_set : 'a array -> int -> 'a -> 'a -> bool =
     "%array_atomic_cas"
 end
+*)

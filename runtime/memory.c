@@ -381,7 +381,7 @@ CAMLexport value atomic_load_field (value obj, intnat field)
     return Field(obj, field);
   } else {
     value v;
-    value* ref = &Field(obj, field);
+    value_ptr ref = &Field(obj, field);
     /* See Note [MM] above */
     atomic_thread_fence(memory_order_acquire);
     v = atomic_load(Op_atomic_val(ref));
@@ -425,7 +425,7 @@ CAMLexport value caml_atomic_exchange_field (value obj, intnat field, value newv
     ret = Field(obj, field);
     Field(obj, field) = newval;
   } else {
-    value* ref = &Field(obj, field);
+    value_ptr ref = &Field(obj, field);
     /* See Note [MM] above */
     atomic_thread_fence(memory_order_acquire);
     ret = atomic_exchange(Op_atomic_val(ref), newval);
@@ -497,13 +497,13 @@ CAMLexport value caml_atomic_fetch_add_field(value obj, intnat field, value incr
 {
   value ret;
   if (caml_domain_alone()) {
-    value* p = &Field(obj, field);
+    value_ptr p = &Field(obj, field);
     CAMLassert(Is_long(*p));
     ret = *p;
     *p = Val_long(Long_val(ret) + Long_val(incr));
     /* no write barrier needed, integer write */
   } else {
-    value* p = &Field(obj, field);
+    value_ptr p = &Field(obj, field);
     ret = atomic_fetch_add(Op_atomic_val(p), 2*Long_val(incr));
     /* no write barrier needed, integer write */
   }

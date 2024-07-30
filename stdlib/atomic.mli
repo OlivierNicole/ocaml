@@ -67,7 +67,6 @@ val incr : int t -> unit
 
 (** [decr r] atomically decrements the value of [r] by [1]. *)
 val decr : int t -> unit
-<<<<<<< HEAD
 
 (** {1:examples Examples}
 
@@ -172,54 +171,37 @@ val decr : int t -> unit
     ]}
   *)
 
-(** Module providing atomic operations on arrays. *)
-module Array : sig
-  (** [get a n] returns the element number [n] at array [a], performing the
-      read atomically.
-      The first element has number 0.
-      The last element has number [length a - 1].
+(*
+(** Module providing atomic operations on atomic location, created by the
+    syntax [[%atomic.index a.(i)]] or [[%atomic.unsafe_index a.(i)]]. *)
+module Loc : sig
+  (** Represents an atomic location of type ['a], such as a field of type ['a]
+      in a record, an array element of type ['a], or the contents of an ['a
+      Atomic.t]. *)
+  type 'a t
 
-      @raise Invalid_argument
-      if [n] is outside the range 0 to [(length a - 1)]. *)
-  val get : 'a array -> int -> 'a
+  (** [get l] returns the contents of the atomic location [l]. *)
+  val get : 'a t -> 'a
 
-  (** TODO Make undocumented. *)
-  val unsafe_get : 'a array -> int -> 'a
-
-  (** [set a n x] modifies array [a] atomically, replacing
-      element number [n] with [x].
-
-      @raise Invalid_argument
-      if [n] is outside the range 0 to [length a - 1]. *)
-  val set : 'a array -> int -> 'a -> unit
-
-  (** TODO Make undocumented. *)
-  val unsafe_set : 'a array -> int -> 'a -> unit
+  (** [set l x] modifies the contents of the location [l] atomically,
+      replacing it with [x]. *)
+  val set : 'a t -> 'a -> unit
 
   (** [exchange a n x] replaces element number [n] of array [a] with [x], and
       returns the old element at that index. The whole operation is atomic.
 
       @raise Invalid_argument
       if [n] is outside the range 0 to [length a - 1]. *)
-  val exchange : 'a array -> int -> 'a -> 'a
+  val exchange : 'a t -> 'a -> 'a
 
-  (** TODO Make undocumented. *)
-  val unsafe_exchange : 'a array -> int -> 'a -> 'a
+  (** [fetch_and_add l incr] atomically increments the value at [l] by
+      [incr], and returns the old value (before the increment). *)
+  val fetch_and_add : int t -> int -> int
 
-  (** [fetch_and_add arr idx incr] atomically increments the value at [idx] by
-      [incr], and returns the old value (before the increment).
-
-      @raise Invalid_argument
-      if [n] is outside the range 0 to [(length a - 1)]. *)
-  val fetch_and_add : 'a array -> int -> int -> int
-
-  (** [compare_and_set r seen v] sets the new value of [r] to [v] only
-      if its current value is physically equal to [seen] -- the
-      comparison and the set occur atomically. Returns [true] if the
-      comparison succeeded (so the set happened) and [false]
-      otherwise.
-
-      @raise Invalid_argument
-      if [n] is outside the range 0 to [(length a - 1)]. *)
-  val compare_and_set : 'a array -> int -> 'a -> 'a -> bool
+  (** [compare_and_set l seen v] sets the new value of [l] to [v] only if its
+      current value is physically equal to [seen] -- the comparison and the set
+      occur atomically. Returns [true] if the comparison succeeded (so the set
+      happened) and [false] otherwise. *)
+  val compare_and_set : 'a t -> 'a -> 'a -> bool
 end
+*)

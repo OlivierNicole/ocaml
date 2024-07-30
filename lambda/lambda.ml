@@ -91,14 +91,6 @@ type primitive =
   | Parraysetu of array_kind
   | Parrayrefs of array_kind
   | Parraysets of array_kind
-  | Parrayatomicrefs of array_kind
-  | Parrayatomicrefu of array_kind
-  | Parrayatomicsets of array_kind
-  | Parrayatomicsetu of array_kind
-  | Parrayatomicxchgs of array_kind
-  | Parrayatomicxchgu of array_kind
-  | Parrayatomic_fetch_add
-  | Parrayatomic_cas of array_kind
   (* Test if the argument is a block or an immediate integer *)
   | Pisint
   (* Test if the (integer) argument is outside an interval *)
@@ -155,6 +147,10 @@ type primitive =
   | Patomic_exchange
   | Patomic_cas
   | Patomic_fetch_add
+  | Patomic_field_load of {immediate_or_pointer : immediate_or_pointer}
+  | Patomic_field_exchange
+  | Patomic_field_cas
+  | Patomic_field_fetch_add
   (* Inhibition of optimisation *)
   | Popaque
   (* Fetching domain-local state *)

@@ -167,8 +167,7 @@ CAMLprim value caml_floatarray_atomic_unsafe_exchange(
   CAMLassert (Tag_val(array) == Double_array_tag);
 
   d_old = caml_atomic_exchange_double_flat_field(array, idx, d);
-  Alloc_small(res, Double_wosize, Double_tag,
-    { caml_handle_gc_interrupt_no_async_exceptions(); });
+  Alloc_small(res, Double_wosize, Double_tag, Alloc_small_enter_GC);
   Store_double_val(res, d_old);
   CAMLreturn (res);
 }
@@ -186,8 +185,7 @@ CAMLprim value caml_floatarray_atomic_exchange(value array, value index, value n
     caml_array_bound_error();
 
   d_old = caml_atomic_exchange_double_flat_field(array, idx, d);
-  Alloc_small(res, Double_wosize, Double_tag,
-    { caml_handle_gc_interrupt_no_async_exceptions(); });
+  Alloc_small(res, Double_wosize, Double_tag, Alloc_small_enter_GC);
   Store_double_val(res, d_old);
   CAMLreturn (res);
 }
@@ -310,8 +308,7 @@ CAMLprim value caml_floatarray_atomic_unsafe_get(value array, value index)
 
   CAMLassert (Tag_val(array) == Double_array_tag);
   d = atomic_load_double_flat_field(array, idx);
-  Alloc_small(res, Double_wosize, Double_tag,
-    { caml_handle_gc_interrupt_no_async_exceptions(); });
+  Alloc_small(res, Double_wosize, Double_tag, Alloc_small_enter_GC);
   /* TODO: If I'm not mistaken, no fence needed before this initializing
      store... right? */
   Store_double_val(res, d);

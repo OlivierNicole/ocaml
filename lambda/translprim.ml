@@ -200,14 +200,6 @@ let primitives_table =
     "%array_safe_set", Primitive ((Parraysets gen_array_kind), 3);
     "%array_unsafe_get", Primitive ((Parrayrefu gen_array_kind), 2);
     "%array_unsafe_set", Primitive ((Parraysetu gen_array_kind), 3);
-    "%array_atomic_safe_get", Primitive ((Parrayatomicrefs gen_array_kind), 2);
-    "%array_atomic_unsafe_get", Primitive ((Parrayatomicrefu gen_array_kind), 2);
-    "%array_atomic_safe_set", Primitive ((Parrayatomicsets gen_array_kind), 3);
-    "%array_atomic_unsafe_set", Primitive ((Parrayatomicsetu gen_array_kind), 3);
-    "%array_atomic_safe_exchange", Primitive ((Parrayatomicxchgs gen_array_kind), 3);
-    "%array_atomic_unsafe_exchange", Primitive ((Parrayatomicxchgu gen_array_kind), 3);
-    "%array_atomic_fetch_add", Primitive (Parrayatomic_fetch_add, 3);
-    "%array_atomic_cas", Primitive ((Parrayatomic_cas gen_array_kind), 4);
     "%obj_size", Primitive ((Parraylength gen_array_kind), 1);
     "%obj_field", Primitive ((Parrayrefu gen_array_kind), 2);
     "%obj_set_field", Primitive ((Parraysetu gen_array_kind), 3);
@@ -373,10 +365,10 @@ let primitives_table =
     "%greaterthan", Comparison(Greater_than, Compare_generic);
     "%compare", Comparison(Compare, Compare_generic);
     "%atomic_load",
-    Primitive ((Patomic_load {immediate_or_pointer=Pointer}), 1);
-    "%atomic_exchange", Primitive (Patomic_exchange, 2);
-    "%atomic_cas", Primitive (Patomic_cas, 3);
-    "%atomic_fetch_add", Primitive (Patomic_fetch_add, 2);
+    Primitive ((Patomic_load {immediate_or_pointer=Pointer}), 2);
+    "%atomic_exchange", Primitive (Patomic_exchange, 3);
+    "%atomic_cas", Primitive (Patomic_cas, 4);
+    "%atomic_fetch_add", Primitive (Patomic_fetch_add, 3);
     "%runstack", Primitive (Prunstack, 3);
     "%reperform", Primitive (Preperform, 3);
     "%perform", Primitive (Pperform, 1);
@@ -477,41 +469,6 @@ let specialize_primitive env ty ~has_constant_constructor prim =
       let array_type = glb_array_type t (array_type_kind env p1) in
       if t = array_type then None
       else Some (Primitive (Parraysets array_type, arity))
-    end
-  | Primitive (Parrayatomicrefu t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicrefu array_type, arity))
-    end
-  | Primitive (Parrayatomicsetu t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicsetu array_type, arity))
-    end
-  | Primitive (Parrayatomicrefs t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicrefs array_type, arity))
-    end
-  | Primitive (Parrayatomicsets t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicsets array_type, arity))
-    end
-  | Primitive (Parrayatomicxchgu t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicxchgu array_type, arity))
-    end
-  | Primitive (Parrayatomicxchgs t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomicxchgs array_type, arity))
-    end
-  | Primitive (Parrayatomic_cas t, arity), p1 :: _ -> begin
-      let array_type = glb_array_type t (array_type_kind env p1) in
-      if t = array_type then None
-      else Some (Primitive (Parrayatomic_cas array_type, arity))
     end
   | Primitive (Pbigarrayref(unsafe, n, Pbigarray_unknown,
                             Pbigarray_unknown_layout), arity), p1 :: _ -> begin
