@@ -47,7 +47,7 @@ type error =
   | Opened_object of Path.t option
   | Not_an_object of type_expr
   | Repeated_tuple_label of string
-  | Invalid_label_for_call_pos of Parsetree.arg_label
+  | Invalid_label_for_call_pos of Asttypes.arg_label
 
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error

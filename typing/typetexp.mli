@@ -61,7 +61,7 @@ val valid_tyvar_name : string -> bool
     to {{!Types.arg_label.Position}[Position l]} when the type is of the form
     [[%call_pos]]. *)
 val transl_label :
-        Parsetree.arg_label -> Parsetree.core_type option -> Types.arg_label
+        Asttypes.arg_label -> Parsetree.core_type option -> Types.arg_label
 
 (** Produces a Typedtree argument label, as well as the pattern corresponding
     to the argument. [transl_label lbl pat] is equal to:
@@ -71,7 +71,7 @@ val transl_label :
     - [transl_label lbl None, pat] otherwise.
   *)
 val transl_label_from_pat :
-        Parsetree.arg_label -> Parsetree.pattern
+        Asttypes.arg_label -> Parsetree.pattern
         -> Types.arg_label * Parsetree.pattern
 
 val transl_simple_type:
@@ -114,7 +114,7 @@ type error =
   | Opened_object of Path.t option
   | Not_an_object of type_expr
   | Repeated_tuple_label of string
-  | Invalid_label_for_call_pos of Parsetree.arg_label
+  | Invalid_label_for_call_pos of Asttypes.arg_label
 
 exception Error of Location.t * Env.t * error
 

@@ -59,11 +59,6 @@ module Doc = struct
 
   let type_path ppf p = !Oprint.out_ident ppf (tree_of_type_path p)
 
-  let arg_label ppf = function
-    | Nolabel -> ()
-    | Labelled s | Position s -> pp_print_string ppf s
-    | Optional s -> fprintf ppf "?%s" s
-
   let value_description id ppf decl =
     !Oprint.out_sig_item ppf (tree_of_value_description id decl)
 

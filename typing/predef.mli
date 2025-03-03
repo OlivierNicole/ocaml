@@ -40,6 +40,7 @@ type data_type_constr = [
   | `Eff
   | `List
   | `Option
+  | `Lexing_position
 ]
 type type_constr = [
   | abstract_type_constr

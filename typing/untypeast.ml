@@ -391,7 +391,7 @@ let value_binding sub vb =
     (sub.pat sub vb.vb_pat)
     (sub.expr sub vb.vb_expr)
 
-let label : Types.arg_label -> Parsetree.arg_label = function
+let label : Types.arg_label -> Asttypes.arg_label = function
   (* There is no Position label in the Parsetree, since we parse [%call_pos]
      arguments as Labelled. The correctness of this translation depends on
      also re-inserting the constraint pattern (P : [%call_pos]) to the generated
@@ -574,6 +574,7 @@ let expression sub exp =
                                  (Exp.construct ~loc (map_loc sub lid) None)
                              ])
     | Texp_open (od, exp) ->
+        Pexp_open (sub.open_declaration sub od, sub.expr sub exp)
   in
   List.fold_right (exp_extra sub) exp.exp_extra
     (Exp.mk ~loc ~attrs desc)

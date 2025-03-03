@@ -1088,7 +1088,6 @@ struct
     mk_no_alias_deps F._no_alias_deps;
     mk_app_funct F._app_funct;
     mk_no_app_funct F._no_app_funct;
-    mk_directory F._directory;
     mk_no_check_prims F._no_check_prims;
     mk_noassert F._noassert;
     mk_noautolink_byt F._noautolink;
@@ -1301,7 +1300,6 @@ struct
     mk_linscan F._linscan;
     mk_app_funct F._app_funct;
     mk_no_app_funct F._no_app_funct;
-    mk_directory F._directory;
     mk_no_float_const_prop F._no_float_const_prop;
     mk_noassert F._noassert;
     mk_noautolink_opt F._noautolink;

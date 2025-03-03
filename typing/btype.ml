@@ -641,7 +641,7 @@ let backtrack = backtrack ~cleanup_abbrev
                   (*  Utilities for labels          *)
                   (**********************************)
 
-let is_optional_parsetree : Parsetree.arg_label -> bool = function
+let is_optional_parsetree : Asttypes.arg_label -> bool = function
     Optional _ -> true
   | _ -> false
 

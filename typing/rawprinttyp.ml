@@ -18,7 +18,6 @@
 
 open Format
 open Types
-open Asttypes
 let longident = Pprintast.longident
 
 let raw_list pr ppf = function
@@ -35,6 +34,11 @@ let string_of_field_kind v =
   | Fpublic -> "Fpublic"
   | Fabsent -> "Fabsent"
   | Fprivate -> "Fprivate"
+
+let string_of_label : Types.arg_label -> string = function
+  | Nolabel -> ""
+  | Labelled s | Position s -> s
+  | Optional s -> "?"^s
 
 let rec safe_repr v t =
   match Transient_expr.coerce t with

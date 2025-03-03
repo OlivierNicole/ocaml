@@ -42,7 +42,6 @@ module type Printers := sig
     val ident: Ident.t printer
     val path: Path.t printer
     val type_path: Path.t printer
-    val arg_label: arg_label printer
     (** Print a type path taking account of [-short-paths].
         Calls should be within [wrap_printing_env]. *)
 

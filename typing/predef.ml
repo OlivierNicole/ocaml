@@ -51,6 +51,7 @@ type data_type_constr = [
   | `Eff
   | `List
   | `Option
+  | `Lexing_position
 ]
 type type_constr = [
   | abstract_type_constr
@@ -305,7 +306,26 @@ let decl_of_type_constr tconstr =
       let kind = variant [cstr ident_void []] in
       decl0 ~immediate:Always ~kind ()
   | `Exn -> decl0 ~kind:Type_open ()
-  | `Lexing_position -> decl0 ~kind:(Type_record ([ 42.; ], Record_regular)) ()
+  | `Lexing_position ->
+      decl0 ~kind:(
+        let lbl (field, field_type) =
+          let id = Ident.create_predef field in
+          { ld_id=id;
+            ld_mutable=Immutable;
+            ld_type=field_type;
+            ld_loc=Location.none;
+            ld_attributes=[];
+            ld_uid=Uid.of_predef_id id;
+          }
+        in
+        let labels = List.map lbl [
+          ("pos_fname", type_string);
+          ("pos_lnum", type_int);
+          ("pos_bol", type_int);
+          ("pos_cnum", type_int) ]
+        in
+        Type_record (labels, Record_regular)
+      ) ()
   | `Eff ->
       let kind _ = Type_open in
       decl1 ~variance:Variance.full ~kind ()

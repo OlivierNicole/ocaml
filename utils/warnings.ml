@@ -1261,7 +1261,8 @@ let message = function
         "This tuple pattern@ unnecessarily@ ends in %a,@ as@ it@ explicitly@ \
          matches@ all@ components@ of@ its@ expected@ type."
         Style.inline_code ".."
-  | Unerasable_position_argument -> "this position argument cannot be erased."
+  | Unerasable_position_argument ->
+      msg "this position argument@ cannot be erased."
 ;;
 
 let nerrors = ref 0
