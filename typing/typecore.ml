@@ -2945,7 +2945,7 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
     | Some (l, arrow_kind) ->
       begin
         let name = label_name l
-        and optional = is_optional l in
+        and optional = is_optional l
         and omittable = is_omittable l in
         let remaining_sargs, arg_opt =
           if ignore_labels then begin
@@ -2954,7 +2954,7 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
             | [] -> assert false
             | (l', sarg) :: remaining_sargs ->
                 if name = label_name l' || (not omittable && l' = Nolabel) then
-                  (remaining_sargs, Right (sarg, l'))
+                  (remaining_sargs, Either.Right (sarg, l'))
                 else if
                   omittable &&
                   not (List.exists (fun (l, _) -> name = label_name l)
@@ -2962,7 +2962,7 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
                   List.exists (function (Nolabel, _) -> true | _ -> false)
                     sargs
                 then
-                  (sargs, Left l)
+                  (sargs, Either.Left l)
                 else
                   raise(Error(sarg.pexp_loc, env,
                               Apply_wrong_label(l', ty_fun', omittable)))
@@ -2977,10 +2977,10 @@ let collect_apply_args env funct ignore_labels ty_fun ty_fun0 sargs =
                 end;
                 if not optional && is_optional l' then
                   Location.prerr_warning sarg.pexp_loc
-                    (Warnings.Nonoptional_label (Asttypes.string_of_label l));
-                remaining_sargs, Some (sarg, l')
+                    (Warnings.Nonoptional_label (Types.string_of_label l));
+                remaining_sargs, Either.Right (sarg, l')
             | None ->
-                sargs, Left l
+                sargs, Either.Left l
         in
         match arrow_kind with
         | `Arrow (ty_arg, ty_ret, ty_arg0, ty_ret0) ->
@@ -3037,6 +3037,7 @@ let rec is_nonexpansive exp =
   | Texp_constant _
   | Texp_unreachable
   | Texp_function _
+  | Texp_src_pos
   | Texp_array (_, []) -> true
   | Texp_let(_rec_flag, pat_exp_list, body) ->
       List.for_all (fun vb -> is_nonexpansive vb.vb_expr) pat_exp_list &&
@@ -3195,7 +3196,7 @@ let check_recursive_class_bindings env ids exprs =
 
 let rec approx_type env sty =
   match sty.ptyp_desc with
-    Ptyp_arrow (p, _, sty) ->
+    Ptyp_arrow (p, arg_sty, sty) ->
       let p = Typetexp.transl_label p (Some arg_sty) in
       let ty1 = if is_optional p then type_option (newvar ()) else newvar () in
       newty (Tarrow (p, ty1, approx_type env sty, commu_ok))
@@ -3971,7 +3972,7 @@ and type_expect_
         wrap_trace_gadt_instances env (lower_args TypeSet.empty) ty;
         funct
       in
-      let funct, sargs =
+      let (funct, sargs) : _ * (Asttypes.arg_label * _) list =
         let funct = type_sfunct sfunct in
         match funct.exp_desc, sargs with
         | Texp_ident (_, _,
@@ -5174,7 +5175,7 @@ and type_function
         match default_arg with
         | None -> ty_arg, None
         | Some default ->
-            assert (is_optional arg_label);
+            assert (is_optional typed_arg_label);
             let ty_default = newvar () in
             begin
               try unify env (type_option ty_default) ty_arg
@@ -5748,7 +5749,7 @@ and type_argument ?explanation ?recarg env sarg ty_expected' ty_expected =
       in
       Location.prerr_warning texp.exp_loc
         (Warnings.Eliminated_optional_arguments
-           (List.map (fun (l, _) -> Asttypes.string_of_label l) args));
+           (List.map (fun (l, _) -> Types.string_of_label l) args));
       if warn then Location.prerr_warning texp.exp_loc
           (Warnings.Non_principal_labels "eliminated omittable argument");
       (* let-expand to have side effects *)

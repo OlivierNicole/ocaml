@@ -2329,7 +2329,8 @@ let compatible_labels ~in_pattern_mode l1 l2 =
   || (!Clflags.classic || in_pattern_mode)
      && (match l1, l2 with
          | (Nolabel | Labelled _), (Nolabel | Labelled _) -> true
-         | (Optional _ | Position _), (Optional _ | Position _) -> false)
+         | (Optional _ | Position _), _
+         | _, (Optional _ | Position _) -> false)
 
 let eq_labels error_mode ~in_pattern_mode l1 l2 =
   if not (compatible_labels ~in_pattern_mode l1 l2) then

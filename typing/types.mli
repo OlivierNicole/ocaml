@@ -722,3 +722,7 @@ val set_univar: type_expr option ref -> type_expr -> unit
 val link_kind: inside:field_kind -> field_kind -> unit
 val link_commu: inside:commutable -> commutable -> unit
 val set_commu_ok: commutable -> unit
+
+(** Label name as a string, prefixed with a question mark (e.g., [?label]) if
+    the label denotes an optional argument. *)
+val string_of_label : arg_label -> string

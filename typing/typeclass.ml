@@ -1230,13 +1230,13 @@ and class_expr_aux cl_num val_env met_env virt self_scope scl =
         !Clflags.classic ||
         let labels = nonopt_labels [] cl.cl_type in
         List.length labels = List.length sargs &&
-        List.for_all (fun (l,_) -> l = Parsetree.Nolabel) sargs &&
+        List.for_all (fun (l,_) -> l = Asttypes.Nolabel) sargs &&
         List.exists (fun l -> l <> Nolabel) labels &&
         begin
           Location.prerr_warning
             cl.cl_loc
             (Warnings.Labels_omitted
-               (List.map Asttypes.string_of_label
+               (List.map Types.string_of_label
                          (List.filter ((<>) Nolabel) labels)));
           true
         end
@@ -1263,7 +1263,7 @@ and class_expr_aux cl_num val_env met_env virt self_scope scl =
             in
             let eliminate_position_arg () =
               let arg = Typecore.src_pos (Location.ghostify scl.pcl_loc) [] val_env in
-              Arg (arg, Jkind.Sort.value)
+              Arg arg
             in
             let remaining_sargs, arg =
               if ignore_labels then begin
@@ -1289,7 +1289,7 @@ and class_expr_aux cl_num val_env met_env virt self_scope scl =
                     if not optional && Btype.is_optional l' then
                       Location.prerr_warning sarg.pexp_loc
                         (Warnings.Nonoptional_label
-                           (Asttypes.string_of_label l));
+                           (Types.string_of_label l));
                     remaining_sargs, use_arg sarg l'
                 | None ->
                     let is_erased () = List.mem_assoc Nolabel sargs in

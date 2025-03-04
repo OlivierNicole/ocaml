@@ -460,12 +460,16 @@ let expression sub exp =
         in
         Pexp_function (params, constraint_, body)
     | Texp_apply (exp, list) ->
-        let list = List.map (fun (arg_label, arg) -> label arg_label, arg) list in
         Pexp_apply (sub.expr sub exp,
-          List.fold_right (fun (label, arg) list ->
-              match arg with
-              | Omitted () -> list
-              | Arg exp -> (label, sub.expr sub exp) :: list
+          List.fold_right (fun (arg_label, arg) list ->
+              match arg_label, arg with
+              | _, Omitted () -> list
+              | Position _, Arg { exp_desc = Texp_src_pos; _ } ->
+                  (* [Texp_src_pos] does not exist in the parsetree and can only
+                     originate from an omitted [Position] argument, so that is
+                     what we reconstruct here. *)
+                  list
+              | _, Arg exp -> (label arg_label, sub.expr sub exp) :: list
           ) list [])
     | Texp_match (exp, cases, eff_cases, _) ->
       let merged_cases = List.map (sub.case sub) cases
@@ -575,6 +579,10 @@ let expression sub exp =
                              ])
     | Texp_open (od, exp) ->
         Pexp_open (sub.open_declaration sub od, sub.expr sub exp)
+   | Texp_src_pos ->
+       (* This has no equivalent in the untyped parse tree. Untyping a
+          well-typed typed tree should not end up here. *)
+       assert false
   in
   List.fold_right (exp_extra sub) exp.exp_extra
     (Exp.mk ~loc ~attrs desc)

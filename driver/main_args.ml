@@ -319,9 +319,6 @@ let mk_app_funct f =
 let mk_no_app_funct f =
   "-no-app-funct", Arg.Unit f, " Deactivate applicative functors"
 
-let mk_directory f =
-  "-directory", Arg.String f, " Directory to use for debug reporting like source code location reporting"
-
 let mk_no_check_prims f =
   "-no-check-prims", Arg.Unit f, " Do not check runtime for primitives"
 

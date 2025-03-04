@@ -396,6 +396,7 @@ let expr sub {exp_loc; exp_extra; exp_desc; exp_env; exp_attributes; _} =
   | Texp_open (od, e) ->
       sub.open_declaration sub od;
       sub.expr sub e
+  | Texp_src_pos -> ()
 
 
 let package_type sub {pack_fields; pack_txt; _} =

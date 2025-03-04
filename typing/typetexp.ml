@@ -408,7 +408,7 @@ let type_open :
     ref =
   ref (fun ?used_slot:_ _ -> assert false)
 
-let transl_label (label : Parsetree.arg_label)
+let transl_label (label : Asttypes.arg_label)
     (arg_opt : Parsetree.core_type option) =
   match label, arg_opt with
   | Labelled l, Some { ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _}
@@ -419,7 +419,7 @@ let transl_label (label : Parsetree.arg_label)
   | Optional l, _ -> Optional l
   | Nolabel, _ -> Nolabel
 
-let transl_label_from_pat (label : Parsetree.arg_label)
+let transl_label_from_pat (label : Asttypes.arg_label)
     (pat : Parsetree.pattern) =
   let label, inner_pat = match pat with
   | {ppat_desc = Ppat_constraint (inner_pat, ty); _} ->
@@ -458,7 +458,7 @@ and transl_type_aux env ~row_context ~aliased ~policy styp =
     in
     ctyp (Ttyp_var name) ty
   | Ptyp_arrow(l, st1, st2) ->
-    let l = transl_label l (Some arg_cty) in
+    let l = transl_label l (Some st1) in
     let arg_cty =
       if Btype.is_position l then
         ctyp Ttyp_call_pos (newconstr Predef.path_lexing_position [])
