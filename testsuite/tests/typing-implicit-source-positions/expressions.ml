@@ -1,8 +1,8 @@
 (* TEST
-   * expect
+   expect;
 *)
 
-let x = [%src_pos]
+let x = (fun ~(pos : [%call_pos]) () -> pos) ()
 [%%expect{|
 val x : lexing_position =
   {pos_fname = ""; pos_lnum = 1; pos_bol = 24; pos_cnum = 32}
@@ -20,7 +20,7 @@ let _ = f ~call_pos:x () ;;
 |}]
 
 let _ = "Increment line count"
-let _ = f ~call_pos:[%src_pos] () ;;
+let _ = f ~call_pos:(f ()) () ;;
 [%%expect{|
 - : string = "Increment line count"
 - : lexing_position =

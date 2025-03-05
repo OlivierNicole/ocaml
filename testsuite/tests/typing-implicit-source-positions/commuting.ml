@@ -1,5 +1,5 @@
 (* TEST
-   * expect
+   expect;
 *)
 
 let pos_a : lexing_position = {Lexing.dummy_pos with pos_fname = "a"};;
@@ -73,14 +73,17 @@ let _ = k ~a:Lexing.dummy_pos ~a:0 ();;
 Line 1, characters 13-29:
 1 | let _ = k ~a:Lexing.dummy_pos ~a:0 ();;
                  ^^^^^^^^^^^^^^^^
-Error: This expression has type Lexing.position = lexing_position
-       but an expression was expected of type int
+Error: The value "Lexing.dummy_pos" has type "Lexing.position" = "lexing_position"
+       but an expression was expected of type "int"
 |}]
 
 let _ = k ~a:0 ~a:Lexing.dummy_pos ();;
 [%%expect{|
 - : Lexing.position =
 {Lexing.pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+|}, Principal{|
+- : lexing_position =
+{pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
 |}]
 
 (* Labels on source positions can't commute in definitions *)
@@ -90,14 +93,15 @@ Line 1, characters 57-103:
 1 | let m : a:[%call_pos] -> b:[%call_pos] -> unit -> unit = fun ~(b:[%call_pos]) ~(a:[%call_pos]) () -> ()
                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This function should have type
-         a:[%call_pos] -> b:[%call_pos] -> unit -> unit
-       but its first argument is ~(b:[%call_pos]) instead of ~(a:[%call_pos])
+         "a:[%call_pos] -> b:[%call_pos] -> unit -> unit"
+       but its first argument is "~(b : [%call_pos])"
+       instead of "~(a : [%call_pos])"
 |}]
 
 (* Object system *)
 
 class c ~(a : [%call_pos]) ~(b : [%call_pos]) () =
-  object 
+  object
     method x = a, b
   end
 [%%expect{|
