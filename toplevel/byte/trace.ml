@@ -60,6 +60,9 @@ let set_code_pointer cls ptr =
 let invoke_traced_function codeptr env arg =
   Meta.invoke_traced_function codeptr env arg
 
+let print_label ppf l =
+  if l <> Nolabel then fprintf ppf "%s:" (Types.string_of_label l)
+
 (* If a function returns a functional value, wrap it into a trace code *)
 
 let rec instrument_result env name ppf clos_typ =
@@ -80,7 +83,7 @@ let rec instrument_result env name ppf clos_typ =
             try
               fprintf ppf "@[<2>%a <--@ %a%a@]@."
                 Printtyp.longident starred_name
-                Printtyp.arg_label l
+                print_label l
                 (print_value !toplevel_env arg) t1;
               may_trace := true;
               let res = (Obj.magic clos_val : Obj.t -> Obj.t) arg in

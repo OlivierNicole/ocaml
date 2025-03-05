@@ -136,7 +136,7 @@ let string_of_class_params c =
           (
            match label with
              Types.Nolabel -> ""
-           | s -> Format.asprintf "%s:" Printtyp.arg_label s
+           | s -> Format.asprintf "%s:" (Types.string_of_label s)
           )
           (if parent then "(" else "")
           (Odoc_print.string_of_type_expr
