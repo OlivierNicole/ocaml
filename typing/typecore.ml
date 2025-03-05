@@ -3224,7 +3224,7 @@ let type_approx_fun env label default spat ret_ty =
     match label, default with
     | (Nolabel | Labelled _), _ -> ty
     | Position _, _ ->
-        unify_pat_types spat.ppat_loc env ty Predef.type_lexing_position;
+        unify_pat_types spat.ppat_loc env ty (instance Predef.type_lexing_position);
         ty
     | Optional _, None ->
        unify_pat_types spat.ppat_loc env ty (type_option (newvar ()));
@@ -5104,6 +5104,10 @@ and split_function_ty env ty_expected ~arg_label ~first ~in_function =
           with Unify _ -> assert false
         end;
         type_option tv
+            else if is_position arg_label then (
+        (try unify env ty_arg (instance Predef.type_lexing_position)
+         with Unify _ -> assert false);
+         instance Predef.type_lexing_position)
       else ty_arg
     in
     (ty_arg, ty_res)
@@ -7271,7 +7275,7 @@ let report_error ~loc env = function
       let label ~long ppf = function
         | Nolabel -> fprintf ppf "unlabeled"
         | Position l ->
-            let s = Format.sprintf "~(%s :@ [%%call_pos])" l in
+            let s = Format.sprintf "~(%s : [%%call_pos])" l in
             Style.inline_code ppf s
         | Labelled _ | Optional _ as l ->
             if long then
