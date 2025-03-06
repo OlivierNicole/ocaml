@@ -1,5 +1,5 @@
 (* TEST
-   * expect
+   expect;
 *)
 
 let f = fun ~(call_pos:[%call_pos]) () -> call_pos

@@ -1,5 +1,5 @@
 (* TEST
-   * expect
+   expect;
 *)
 
 type t = [%call_pos]
@@ -42,9 +42,10 @@ let _ = apply g ;;
 Line 1, characters 14-15:
 1 | let _ = apply g ;;
                   ^
-Error: This expression has type call_pos:[%call_pos] -> unit -> unit
+Error: The value "g" has type "call_pos:[%call_pos] -> unit -> unit"
        but an expression was expected of type
-         call_pos:Lexing.position -> (unit -> 'a)
+         "call_pos:Lexing.position -> unit -> 'a"
+       The label "call_pos" was not expected to be of type "[%call_pos]"
 |}]
 
 let h ?(call_pos:[%call_pos]) () = ()
@@ -69,10 +70,10 @@ let k : call_pos:[%call_pos] -> unit -> unit =
 Line 2, characters 3-25:
 2 |    fun ~call_pos () -> ()
        ^^^^^^^^^^^^^^^^^^^^^^
-Error: This function should have type call_pos:[%call_pos] -> unit -> unit
-       but its first argument is labeled ~call_pos
-       instead of ~(call_pos:[%call_pos])
-Hint: Consider explicitly annotating the label with '[%call_pos]'
+Error: This function should have type "call_pos:[%call_pos] -> unit -> unit"
+       but its first argument is labeled "~call_pos"
+       instead of "~(call_pos : [%call_pos])"
+Hint: Consider explicitly annotating the label with "[%call_pos]"
 |}]
 
 let n = fun ~(call_pos:[%call_pos]) () -> call_pos
@@ -96,19 +97,21 @@ class this_class_has_an_unerasable_argument ~(pos : [%call_pos]) = object end
 Line 1, characters 46-49:
 1 | class this_class_has_an_unerasable_argument ~(pos : [%call_pos]) = object end
                                                   ^^^
-Warning 188 [unerasable-position-argument]: this position argument cannot be erased.
+Warning 76 [unerasable-position-argument]: this position argument
+  cannot be erased.
 
 class this_class_has_an_unerasable_argument : pos:[%call_pos] -> object  end
 |}]
 
-class c = object 
+class c = object
   method this_method_has_an_unerasable_argument ~(pos : [%call_pos]) = pos
 end
 [%%expect{|
 Line 2, characters 50-53:
 2 |   method this_method_has_an_unerasable_argument ~(pos : [%call_pos]) = pos
                                                       ^^^
-Warning 188 [unerasable-position-argument]: this position argument cannot be erased.
+Warning 76 [unerasable-position-argument]: this position argument
+  cannot be erased.
 
 class c :
   object
@@ -123,7 +126,8 @@ let this_object_has_an_unerasable_argument ~(pos : [%call_pos]) = object end
 Line 1, characters 45-48:
 1 | let this_object_has_an_unerasable_argument ~(pos : [%call_pos]) = object end
                                                  ^^^
-Warning 188 [unerasable-position-argument]: this position argument cannot be erased.
+Warning 76 [unerasable-position-argument]: this position argument
+  cannot be erased.
 
 val this_object_has_an_unerasable_argument : pos:[%call_pos] -> <  > = <fun>
 |}]

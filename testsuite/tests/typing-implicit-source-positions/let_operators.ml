@@ -1,5 +1,5 @@
 (* TEST
-   * expect
+   expect;
 *)
 
 let ( let+ ) ~(call_pos : [%call_pos]) a f = f (call_pos, a);;
@@ -10,7 +10,7 @@ val ( let+ ) :
 
 (* Would be nice to add support for implicit position parameters and (also maybe optional
    arguments) for let operators. *)
-let _ = 
+let _ =
   let+ (call_pos, a) = 1 in
   call_pos
 
@@ -23,7 +23,7 @@ Error: The operator let+ has type
        but it was expected to have type 'c -> ('d -> 'e) -> 'f
 |}]
 
-let ( let* ) ?(call_pos = 1) a g = g (call_pos, a);; 
+let ( let* ) ?(call_pos = 1) a g = g (call_pos, a);;
 
 let _ =
   let* (call_pos, a) = 1 in

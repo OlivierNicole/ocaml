@@ -273,7 +273,7 @@ let explain_incompatible_fields name (diff: Types.type_expr Errortrace.diff) =
 
 let explain_label_mismatch ~got ~expected =
   let quoted_label ppf l = Style.inline_code ppf (Types.string_of_label l) in
-  let call_pos ppf () = Style.inline_code ppf "[%%call_pos]" in
+  let call_pos ppf () = Style.inline_code ppf "[%call_pos]" in
   match got, expected with
   | Types.Nolabel, Types.(Labelled _ | Optional _ | Position _)  ->
       doc_printf "@,@[A label@ %a@ was expected@]"

@@ -1,8 +1,8 @@
 (* TEST
-   * expect
+   expect;
 *)
 
-let object_with_a_method_with_a_positional_parameter = object 
+let object_with_a_method_with_a_positional_parameter = object
   method m ~(call_pos : [%call_pos]) () = call_pos
 end
 
@@ -18,7 +18,7 @@ val position : lexing_position =
   {pos_fname = ""; pos_lnum = 1; pos_bol = 281; pos_cnum = 296}
 |}]
 
-class class_with_a_method_with_a_positional_parameter = object 
+class class_with_a_method_with_a_positional_parameter = object
   method m ~(call_pos : [%call_pos]) () = call_pos
 end
 
@@ -48,7 +48,7 @@ val position : lexing_position =
 |}]
 
 
-class class_with_positional_parameter ~(call_pos : [%call_pos]) () = object 
+class class_with_positional_parameter ~(call_pos : [%call_pos]) () = object
   method call_pos = call_pos
 end
 
@@ -102,7 +102,7 @@ class parent ~(call_pos : [%call_pos]) () = object
   method pos = call_pos
 end
 
-let o = object 
+let o = object
   inherit parent ()
 end
 let position = o#pos
@@ -115,7 +115,7 @@ val position : lexing_position =
   {pos_fname = ""; pos_lnum = 6; pos_bol = 2611; pos_cnum = 2621}
 |}]
 
-let o ~(call_pos : [%call_pos]) () = object 
+let o ~(call_pos : [%call_pos]) () = object
   inherit parent ~call_pos ()
 end
 let position = (o ())#pos
@@ -127,7 +127,7 @@ val position : lexing_position =
 |}]
 
 (* Applying an call_pos argument without a label. *)
-let o ~(call_pos : [%call_pos]) () = object 
+let o ~(call_pos : [%call_pos]) () = object
   inherit parent call_pos ()
 end
 let position = (o ())#pos
@@ -149,7 +149,7 @@ class parent ?(i = 1) () = object
   method i = i
 end
 
-let o = object 
+let o = object
   inherit parent ()
 end
 let position = o#i
@@ -162,7 +162,7 @@ val position : int = 1
 
 (* Partially applying a class *)
 class c ~(a : [%call_pos]) ~(b : [%call_pos]) () =
-  object 
+  object
     method a = a
     method b = b
   end
