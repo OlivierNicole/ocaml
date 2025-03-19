@@ -178,6 +178,9 @@ let is_omitted = function
   | Arg _ -> false
   | Omitted () -> true
 
+let loc_POS_prim =
+  Primitive.simple ~name:"%loc_POS" ~arity:0 ~alloc:false
+
 let rec transl_exp ~scopes e =
   transl_exp1 ~scopes ~in_new_scope:false e
 
@@ -598,22 +601,12 @@ and transl_exp0 ~in_new_scope ~scopes e =
                !transl_module ~scopes Tcoerce_none None od.open_expr, body)
       end
   | Texp_src_pos ->
-      let pos = e.exp_loc.loc_start in
-      let pos =
-        match pos.pos_fname with
-        | "" -> pos
-        | fname ->
-          let pos_fname = Location.absolute_path fname in
-          { pos with pos_fname }
-      in
-      let cl =
-        [ Const_base (Const_string (pos.pos_fname, e.exp_loc, None))
-        ; Const_base (Const_int pos.pos_lnum)
-        ; Const_base (Const_int pos.pos_bol)
-        ; Const_base (Const_int pos.pos_cnum)
-        ]
-      in
-      Lconst(Const_block(0, cl))
+      Translprim.transl_primitive
+        (of_location ~scopes e.exp_loc)
+        loc_POS_prim
+        e.exp_env
+        e.exp_type
+        None
 
 and pure_module m =
   match m.mod_desc with
