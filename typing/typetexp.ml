@@ -483,7 +483,7 @@ and transl_type_aux env ~row_context ~aliased ~policy styp =
     let l = transl_label l (Some st1) in
     let arg_cty =
       if Btype.is_position l then
-        ctyp Ttyp_call_pos (newconstr Predef.path_lexing_position [])
+        ctyp Ttyp_call_pos (newconstr Predef.path_lexing_location [])
       else transl_type env ~policy ~row_context st1
     in
     let ret_cty = transl_type env ~policy ~row_context st2 in

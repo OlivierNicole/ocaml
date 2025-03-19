@@ -428,7 +428,7 @@ and class_type_aux env virt self_scope scty =
       let l = transl_label l (Some sty) in
       let cty =
         match l with
-        | Position _ -> ctyp Ttyp_call_pos (Ctype.newconstr Predef.path_lexing_position [])
+        | Position _ -> ctyp Ttyp_call_pos (Ctype.newconstr Predef.path_lexing_location [])
         | Optional _ | Labelled _ | Nolabel ->
           transl_simple_type env ~closed:false sty
       in
@@ -1463,7 +1463,7 @@ let rec approx_declaration cl =
       let arg =
         match l with
         | Optional _ -> Ctype.instance var_option
-        | Position _ -> Ctype.instance Predef.type_lexing_position
+        | Position _ -> Ctype.instance Predef.type_lexing_location
         | Labelled _ | Nolabel -> Ctype.newvar ()
       in
       Ctype.newty (Tarrow (l, arg, approx_declaration cl, commu_ok))

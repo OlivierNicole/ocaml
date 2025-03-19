@@ -17,7 +17,7 @@
 
 (** {1 Positions} *)
 
-type position = lexing_position = {
+type position = {
   pos_fname : string;
   pos_lnum : int;
   pos_bol : int;

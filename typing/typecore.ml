@@ -369,7 +369,7 @@ let src_pos loc attrs env =
   { exp_desc = Texp_src_pos
   ; exp_loc = loc
   ; exp_extra = []
-  ; exp_type = instance Predef.type_lexing_position
+  ; exp_type = instance Predef.type_lexing_location
   ; exp_attributes = attrs
   ; exp_env = env
   }
@@ -3225,7 +3225,7 @@ let type_approx_fun env label default spat ret_ty =
     match label, default with
     | (Nolabel | Labelled _), _ -> ty
     | Position _, _ ->
-        unify_pat_types spat.ppat_loc env ty (instance Predef.type_lexing_position);
+        unify_pat_types spat.ppat_loc env ty (instance Predef.type_lexing_location);
         ty
     | Optional _, None ->
        unify_pat_types spat.ppat_loc env ty (type_option (newvar ()));
@@ -5108,9 +5108,9 @@ and split_function_ty env ty_expected ~arg_label ~first ~in_function =
         end;
         type_option tv
       else if is_position arg_label then (
-        (try unify env ty_arg (instance Predef.type_lexing_position)
+        (try unify env ty_arg (instance Predef.type_lexing_location)
          with Unify _ -> assert false);
-         instance Predef.type_lexing_position)
+         instance Predef.type_lexing_location)
       else ty_arg
     in
     (ty_arg, ty_res)
@@ -5193,7 +5193,7 @@ and type_function
         | None -> ty_arg, None
         | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _} ->
             assert (is_position typed_arg_label);
-            let ty_default = instance Predef.type_lexing_position in
+            let ty_default = instance Predef.type_lexing_location in
             (try unify env ty_default ty_arg
              with Unify _ -> assert false);
             ty_default, None
