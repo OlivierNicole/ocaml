@@ -411,7 +411,7 @@ let type_open :
 let transl_label (label : Asttypes.arg_label)
     (arg_opt : Parsetree.core_type option) =
   match label, arg_opt with
-  | Labelled l, Some { ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _}
+  | Optional l, Some { ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _}
       -> Position l
   | _, Some ({ ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _} as arg)
       -> raise (Error (arg.ptyp_loc, Env.empty, Invalid_label_for_call_pos label))
@@ -420,16 +420,17 @@ let transl_label (label : Asttypes.arg_label)
   | Nolabel, _ -> Nolabel
 
 let transl_label_from_pat (label : Asttypes.arg_label)
-    (pat : Parsetree.pattern) =
-  let label, inner_pat = match pat with
-  | {ppat_desc = Ppat_constraint (inner_pat, ty); _} ->
-      (* If the argument is a constraint, translate the label using the
-          type information. Otherwise, it can't be a Position argument, so
-          we don't care about the argument type *)
+    (default : Parsetree.expression option) =
+  match default with
+  | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _ } ->
+      let ty =
+        { ptyp_desc = Ptyp_extension (Location.mknoloc "call_pos", PStr []);
+          ptyp_loc = Location.none;
+          ptyp_loc_stack = [];
+          ptyp_attributes = [] }
+      in
       transl_label label (Some ty), inner_pat
   | _ -> transl_label label None, pat
-  in
-  label, if Btype.is_position label then inner_pat else pat
 
 let rec transl_type env ~policy ?(aliased=false) ~row_context styp =
   Builtin_attributes.warning_scope styp.ptyp_attributes
@@ -1008,11 +1009,13 @@ let report_error_doc env ppf = function
       fprintf ppf "@[This tuple type has two labels named %a@]"
         Style.inline_code l
   | Invalid_label_for_call_pos arg_label ->
-      fprintf ppf "A position argument must not be %s."
-        (match arg_label with
-        | Nolabel -> "unlabelled"
-        | Optional _ -> "optional"
-        | Labelled _ -> assert false)
+      let negation, adjective =
+        match arg_label with
+        | Nolabel -> "not ", "unlabelled"
+        | Optional _ -> assert false
+        | Labelled _ -> "", "optional"
+      in
+      fprintf ppf "A position argument must %sbe %s." negation adjective
 
 let () =
   Location.register_error_of_exn

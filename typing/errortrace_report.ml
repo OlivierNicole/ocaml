@@ -293,7 +293,7 @@ let explain_label_mismatch ~got ~expected =
         quoted_label got
   | Types.Labelled g, Types.Position e when g = e ->
       doc_printf
-        "@,@[The label@ %a@ was expected to be of type %a@]"
+        "@,@[The label@ %a@ was expected to be of type %a@ (source position)@]"
         quoted_label got
         call_pos ()
   | Types.Position g, Types.Labelled e when g = e ->

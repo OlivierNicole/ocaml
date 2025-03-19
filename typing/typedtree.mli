@@ -696,7 +696,7 @@ and core_type_desc =
   | Ttyp_open of Path.t * Longident.t loc * core_type
   | Ttyp_call_pos
       (** [Ttyp_call_pos] represents the type of the value of a Position
-          argument ([lbl:[%call_pos] -> ...]). *)
+          argument ([?lbl:[%call_pos] -> ...]). *)
 
 and package_type = {
   pack_path : Path.t;

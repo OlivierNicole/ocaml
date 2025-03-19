@@ -662,8 +662,8 @@ let label_name = function
 
 let prefixed_label_name = function
     Nolabel -> ""
-  | Labelled s | Position s -> "~" ^ s
-  | Optional s -> "?" ^ s
+  | Labelled s -> "~" ^ s
+  | Optional s | Position s -> "?" ^ s
 
 let rec extract_label_aux hd l = function
   | [] -> None

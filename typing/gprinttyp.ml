@@ -420,7 +420,7 @@ module Pp = struct
     | Nolabel -> ()
     | Labelled s -> fprintf ppf "<SUP>%s</SUP>" s
     | Optional s -> fprintf ppf "<SUP>?%s</SUP>" s
-    | Position s -> fprintf ppf "<SUP>%s:[%%call_pos]</SUP>" s
+    | Position s -> fprintf ppf "<SUP>?%s:[%%call_pos]</SUP>" s
 
   let pretty_var ppf name =
     let name = Option.value ~default:"_" name in

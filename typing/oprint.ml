@@ -283,8 +283,8 @@ let pr_vars =
 let print_arg_label ppf (lbl : arg_label) =
   match lbl with
   | Nolabel -> ()
-  | Labelled s | Position s -> fprintf ppf "%a:" print_lident s
-  | Optional s -> fprintf ppf "?%a:" print_lident s
+  | Labelled s -> fprintf ppf "%a:" print_lident s
+  | Optional s | Position s -> fprintf ppf "?%a:" print_lident s
 
 let rec print_out_type ppf =
   function

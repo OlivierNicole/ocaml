@@ -909,6 +909,6 @@ let undo_compress (changes, _old) =
 
 let string_of_label : arg_label -> string = function
   | Nolabel -> ""
-  | Labelled s | Position s -> s
-  | Optional s -> "?"^s
+  | Labelled s -> s
+  | Optional s | Position s -> "?"^s
 

@@ -144,7 +144,7 @@ and arg_label =
   | Nolabel
   | Labelled of string (** [label:T -> ...] *)
   | Optional of string (** [?label:T -> ...] *)
-  | Position of string (** [label:[%call_pos] -> ...] *)
+  | Position of string (** [?label:[%call_pos] -> ...] *)
 
 and fixed_explanation =
   | Univar of type_expr (** The row type was bound to an univar *)
@@ -724,5 +724,5 @@ val link_commu: inside:commutable -> commutable -> unit
 val set_commu_ok: commutable -> unit
 
 (** Label name as a string, prefixed with a question mark (e.g., [?label]) if
-    the label denotes an optional argument. *)
+    the label denotes an optional or a position argument. *)
 val string_of_label : arg_label -> string

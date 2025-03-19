@@ -340,8 +340,8 @@ and expression_desc =
       A function must have parameters. [Pexp_function (params, _, body)] must
       have non-empty [params] or a [Pfunction_cases _] body.
 
-      Note: while Position arguments ([lbl:[%call_pos] -> ...]) are parsed as
-      {{!Asttypes.arg_label.Labelled}[Labelled l]}, they are converted to
+      Note: while Position arguments [?(lbl = [%call_pos]) -> ...] are parsed as
+      {{!Asttypes.arg_label.Optional}[Optional l]}, they are converted to
       {{!Types.arg_label.Position}[Position l]} arguments during typechecking.
   *)
   | Pexp_apply of expression * (arg_label * expression) list

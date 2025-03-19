@@ -393,11 +393,11 @@ let value_binding sub vb =
 
 let label : Types.arg_label -> Asttypes.arg_label = function
   (* There is no Position label in the Parsetree, since we parse [%call_pos]
-     arguments as Labelled. The correctness of this translation depends on
+     arguments as Optional. The correctness of this translation depends on
      also re-inserting the constraint pattern (P : [%call_pos]) to the generated
      tree. *)
-  | Labelled l | Position l -> Labelled l
-  | Optional l -> Optional l
+  | Labelled l -> Labelled l
+  | Optional l | Position l -> Optional l
   | Nolabel -> Nolabel
 
 let call_pos_extension = Location.mknoloc "call_pos_extension", PStr []

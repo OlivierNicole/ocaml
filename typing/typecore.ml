@@ -3290,7 +3290,7 @@ and type_approx_function env params c body ~loc =
   *)
   match params with
   | { pparam_desc = Pparam_val (label, default, pat) } :: params ->
-      let label, pat = Typetexp.transl_label_from_pat label pat in
+      let label, pat = Typetexp.transl_label_from_default label default in
       type_approx_fun env label default pat
         (type_approx_function env params c body ~loc)
   | { pparam_desc = Pparam_newtype _ } :: _ ->
@@ -5104,7 +5104,7 @@ and split_function_ty env ty_expected ~arg_label ~first ~in_function =
           with Unify _ -> assert false
         end;
         type_option tv
-            else if is_position arg_label then (
+      else if is_position arg_label then (
         (try unify env ty_arg (instance Predef.type_lexing_position)
          with Unify _ -> assert false);
          instance Predef.type_lexing_position)
@@ -5169,7 +5169,9 @@ and type_function
   | { pparam_desc = Pparam_val (arg_label, default_arg, pat); pparam_loc }
       :: rest
     ->
-      let typed_arg_label, pat = Typetexp.transl_label_from_pat arg_label pat in
+      let typed_arg_label, pat =
+        Typetexp.transl_label_from_default arg_label default_arg
+      in
       let ty_arg, ty_res =
         split_function_ty env ty_expected ~arg_label:typed_arg_label ~first ~in_function
       in
@@ -5181,6 +5183,14 @@ and type_function
       let ty_arg_internal, default_arg =
         match default_arg with
         | None -> ty_arg, None
+        | Some ({ pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _}
+                as default) ->
+            assert (is_position typed_arg_label);
+            let ty_default = instance Predef.type_lexing_position in
+            (try unify env ty_default ty_arg
+             with Unify _ -> assert false);
+            let default = type_expect env default (mk_expected ty_default) in
+            ty_default, Some (src_pos (Location.ghostify sarg.pexp_loc) [] env)
         | Some default ->
             assert (is_optional typed_arg_label);
             let ty_default = newvar () in
@@ -5839,7 +5849,7 @@ and type_application env ~app_loc funct sargs =
       (* Consider for example the application
            [f n]
          with
-           [f : a:bar -> ?opt:baz -> int -> unit] *)
+           [f : a:bar -> ?opt:baz -> ?pos:[%call_pos] -> int -> unit] *)
       let ty_ret, args =
         let sargs = List.map
           (* Application will never contain Position labels, so no need to pass
@@ -5854,6 +5864,7 @@ and type_application env ~app_loc funct sargs =
          [ty_ret = unit] and
          [args = [(Label "a", Omitted bar);
                   (Optional "opt", Arg (Eliminated_optional_arg baz));
+                  (Position "por", Arg (Eliminated_optional_arg lexing_position));
                   (Nolabel, Arg (Known_arg n))]] *)
       let args = List.map (fun arg -> type_apply_arg env ~app_loc arg) args in
       (* example: type-check [n] and generate [None] for [?opt].
@@ -7275,7 +7286,7 @@ let report_error ~loc env = function
       let label ~long ppf = function
         | Nolabel -> fprintf ppf "unlabeled"
         | Position l ->
-            let s = Format.sprintf "~(%s : [%%call_pos])" l in
+            let s = Format.sprintf "?(%s = [%%call_pos])" l in
             Style.inline_code ppf s
         | Labelled _ | Optional _ as l ->
             if long then
@@ -7292,8 +7303,9 @@ let report_error ~loc env = function
         | Labelled _, Position _ ->
             fprintf
               ppf
-              "\nHint: Consider explicitly annotating the label with %a"
-              Style.inline_code "[%call_pos]"
+              "\nHint: Consider marking the argument as a source position with \
+               %a"
+              Style.inline_code "= [%call_pos]"
         | _ -> ()
       in
       Location.errorf ~loc
@@ -7508,12 +7520,16 @@ let report_error ~loc env = function
         "@[This tuple pattern has two labels named %a@]"
         Style.inline_code l
   | Invalid_label_for_src_pos arg_label ->
+      let negation, adjective =
+        match arg_label with
+        | Nolabel -> "not ", "unlabelled"
+        | Labelled _ -> "", "optional"
+        | Optional _ | Position _ -> assert false
+      in
       Location.errorf ~loc
-        "A position argument must not be %s."
-        (match arg_label with
-        | Nolabel -> "unlabelled"
-        | Optional _ -> "optional"
-        | Labelled _ | Position _ -> assert false)
+        "A position argument must %sbe %s."
+        negation
+        adjective
 
 let report_error ~loc env err =
   Printtyp.wrap_printing_env ~error:true env
