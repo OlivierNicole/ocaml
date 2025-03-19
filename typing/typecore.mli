@@ -246,6 +246,7 @@ type error =
   | Repeated_tuple_exp_label of string
   | Repeated_tuple_pat_label of string
   | Invalid_label_for_src_pos of arg_label
+  | Missing_default_for_src_pos
 
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error

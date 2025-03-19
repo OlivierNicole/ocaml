@@ -1126,8 +1126,15 @@ and class_expr_aux cl_num val_env met_env virt self_scope scl =
           cl_env = val_env;
           cl_attributes = scl.pcl_attributes;
          }
-  | Pcl_fun (l, default, spat, sbody) ->
-    let l, spat = Typetexp.transl_label_from_default l default None in
+  | Pcl_fun (untyped_l, default, spat, sbody) ->
+    let l, spat =
+      Typetexp.transl_label_from_pat_and_default untyped_l spat default
+    in
+    (match l, default with
+    | Position _, None ->
+        raise
+          Typecore.(Error (scl.pcl_loc, met_env, Missing_default_for_src_pos))
+    | _ -> ());
     (match l, default with
     | (Nolabel | Labelled _), Some _ -> assert false (* Not a valid AST *)
     | Optional _, Some default ->
@@ -1156,7 +1163,7 @@ and class_expr_aux cl_num val_env met_env virt self_scope scl =
         in
         let sfun =
           Cl.fun_ ~loc:scl.pcl_loc
-            l None
+            untyped_l None
             (Pat.var ~loc (mknoloc "*opt*"))
             (Cl.let_ ~loc:scl.pcl_loc Nonrecursive [Vb.mk spat smatch] sbody)
             (* Note: we don't put the '#default' attribute, as it
@@ -1451,8 +1458,8 @@ let var_option = Predef.type_option (Btype.newgenvar ())
 
 let rec approx_declaration cl =
   match cl.pcl_desc with
-    Pcl_fun (l, default, _, cl) ->
-      let l, _ = Typetexp.transl_label_from_default l default in
+    Pcl_fun (l, default, pat, cl) ->
+      let l, _ = Typetexp.transl_label_from_pat_and_default l pat default in
       let arg =
         match l with
         | Optional _ -> Ctype.instance var_option

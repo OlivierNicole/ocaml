@@ -63,16 +63,19 @@ val valid_tyvar_name : string -> bool
 val transl_label :
         Asttypes.arg_label -> Parsetree.core_type option -> Types.arg_label
 
-(** [transl_label lbl default_value] produces a Typedtree argument label for an
-    argument with label [lbl] with default value [default_value]. It is equal
-    to:
+(** [transl_label lbl pat default_value] produces a Typedtree argument label
+    for an argument with label [lbl] with pattern [pat] and default value
+    [default_value]. It is equal to:
 
-    - [Position l] when [lbl] is {{!Parsetree.arg_label.Labelled}[Optional l]}
-      and [default_value] is not [None] and represents [[%call_pos]]
+    - [Position l, P] when [lbl] is
+      {{!Parsetree.arg_label.Labelled}[Optional l]} and at least one of the
+      following is true: [default_value] is not [None] and represents
+      [[%call_pos]], or [pat] represents [(P : [%call_pos])]. If the latter is
+      not true, then [P = pat].
     - [transl_label lbl None] otherwise.
   *)
-val transl_label_from_default :
-        Asttypes.arg_label -> Parsetree.expression option
+val transl_label_from_pat_and_default :
+        Asttypes.arg_label -> Parsetree.pattern -> Parsetree.expression option
         -> Types.arg_label * Parsetree.pattern
 
 val transl_simple_type:

@@ -2,7 +2,7 @@
    expect;
 *)
 
-let x = (fun ~(pos : [%call_pos]) () -> pos) ()
+let x = (fun ?(pos = [%call_pos]) () -> pos) ()
 [%%expect{|
 val x : lexing_position =
   {pos_fname = ""; pos_lnum = 1; pos_bol = 24; pos_cnum = 32}

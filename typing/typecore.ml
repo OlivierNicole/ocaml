@@ -210,6 +210,7 @@ type error =
   | Repeated_tuple_exp_label of string
   | Repeated_tuple_pat_label of string
   | Invalid_label_for_src_pos of arg_label
+  | Missing_default_for_src_pos
 
 
 let not_principal fmt =
@@ -3290,7 +3291,9 @@ and type_approx_function env params c body ~loc =
   *)
   match params with
   | { pparam_desc = Pparam_val (label, default, pat) } :: params ->
-      let label, pat = Typetexp.transl_label_from_default label default in
+      let label, pat =
+        Typetexp.transl_label_from_pat_and_default label pat default
+      in
       type_approx_fun env label default pat
         (type_approx_function env params c body ~loc)
   | { pparam_desc = Pparam_newtype _ } :: _ ->
@@ -5170,8 +5173,13 @@ and type_function
       :: rest
     ->
       let typed_arg_label, pat =
-        Typetexp.transl_label_from_default arg_label default_arg
+        Typetexp.transl_label_from_pat_and_default arg_label pat default_arg
       in
+      (match typed_arg_label, default_arg with
+      | Position _, None ->
+          raise (Error (pparam_loc, env, Missing_default_for_src_pos))
+      | _ -> ()
+      );
       let ty_arg, ty_res =
         split_function_ty env ty_expected ~arg_label:typed_arg_label ~first ~in_function
       in
@@ -5183,14 +5191,12 @@ and type_function
       let ty_arg_internal, default_arg =
         match default_arg with
         | None -> ty_arg, None
-        | Some ({ pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _}
-                as default) ->
+        | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _} ->
             assert (is_position typed_arg_label);
             let ty_default = instance Predef.type_lexing_position in
             (try unify env ty_default ty_arg
              with Unify _ -> assert false);
-            let default = type_expect env default (mk_expected ty_default) in
-            ty_default, Some (src_pos (Location.ghostify sarg.pexp_loc) [] env)
+            ty_default, None
         | Some default ->
             assert (is_optional typed_arg_label);
             let ty_default = newvar () in
@@ -7530,6 +7536,11 @@ let report_error ~loc env = function
         "A position argument must %sbe %s."
         negation
         adjective
+  | Missing_default_for_src_pos ->
+      Location.errorf ~loc
+        "Missing default for source position parameter.@ \
+         Did you forget to add@ %a?"
+         Style.inline_code "= [%call_pos]"
 
 let report_error ~loc env err =
   Printtyp.wrap_printing_env ~error:true env

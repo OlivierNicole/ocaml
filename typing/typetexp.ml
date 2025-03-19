@@ -419,18 +419,39 @@ let transl_label (label : Asttypes.arg_label)
   | Optional l, _ -> Optional l
   | Nolabel, _ -> Nolabel
 
-let transl_label_from_pat (label : Asttypes.arg_label)
-    (default : Parsetree.expression option) =
-  match default with
-  | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _ } ->
-      let ty =
-        { ptyp_desc = Ptyp_extension (Location.mknoloc "call_pos", PStr []);
-          ptyp_loc = Location.none;
-          ptyp_loc_stack = [];
-          ptyp_attributes = [] }
-      in
-      transl_label label (Some ty), inner_pat
-  | _ -> transl_label label None, pat
+let transl_label_from_pat_and_default
+    (label : Asttypes.arg_label)
+    (pat : Parsetree.pattern)
+    (default : Parsetree.expression option)
+    : Types.arg_label * Parsetree.pattern =
+  let label, inner_pat =
+    match default, pat with
+    | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _ },
+      { ppat_desc = Ppat_constraint (inner_pat, ({ ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _} as ty)); _ } ->
+        (* Maybe valid case: [?(label = [%call_pos] : [%call_pos])].
+           [transl_label] will check that the argument is optional. *)
+        transl_label label (Some ty), inner_pat
+    | None,
+      { ppat_desc = Ppat_constraint (inner_pat, ({ ptyp_desc = Ptyp_extension ({txt="call_pos"; _}, _); _} as ty)); _ } ->
+        (* Maybe an (invalid) expression [fun ?(label : [%call_pos]) -> ...] or
+           a type [?label:[%call_pos] -> ...]. [transl_label] will check that
+           the argument is optional. For the expression case, it is up to this
+           function's caller to reject it due to the missing default
+           expression. *)
+        transl_label label (Some ty), inner_pat
+    | Some { pexp_desc = Pexp_extension ({txt="call_pos"; _}, _); _ }, _ ->
+        (* Maybe valid case: [?(label = [%call_pos])].
+           [transl_label] will check that the argument is optional. *)
+        let ty =
+          { ptyp_desc = Ptyp_extension (Location.mknoloc "call_pos", PStr []);
+            ptyp_loc = Location.none;
+            ptyp_loc_stack = [];
+            ptyp_attributes = [] }
+        in
+        transl_label label (Some ty), pat
+    | _ -> transl_label label None, pat
+  in
+  label, if Btype.is_position label then inner_pat else pat
 
 let rec transl_type env ~policy ?(aliased=false) ~row_context styp =
   Builtin_attributes.warning_scope styp.ptyp_attributes
