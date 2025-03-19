@@ -7306,7 +7306,7 @@ let report_error ~loc env = function
       in
       let maybe_positional_argument_hint ppf () =
         match got, expected with
-        | Labelled _, Position _ ->
+        | Optional _, Position _ ->
             fprintf
               ppf
               "\nHint: Consider marking the argument as a source position with \

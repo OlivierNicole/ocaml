@@ -603,9 +603,7 @@ and transl_exp0 ~in_new_scope ~scopes e =
         match pos.pos_fname with
         | "" -> pos
         | fname ->
-          Format.eprintf "A: fname = %s@," fname;
           let pos_fname = Location.absolute_path fname in
-          Format.eprintf "B: fname = %s@," pos_fname;
           { pos with pos_fname }
       in
       let cl =

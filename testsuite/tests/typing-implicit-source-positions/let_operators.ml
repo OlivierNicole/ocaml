@@ -2,10 +2,10 @@
    expect;
 *)
 
-let ( let+ ) ~(call_pos : [%call_pos]) a f = f (call_pos, a);;
+let ( let+ ) ?(call_pos = [%call_pos]) a f = f (call_pos, a);;
 [%%expect{|
 val ( let+ ) :
-  call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
+  ?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
 |}]
 
 (* Would be nice to add support for implicit position parameters and (also maybe optional
@@ -18,9 +18,11 @@ let _ =
 Line 2, characters 2-6:
 2 |   let+ (call_pos, a) = 1 in
       ^^^^
-Error: The operator let+ has type
-         call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b
-       but it was expected to have type 'c -> ('d -> 'e) -> 'f
+Error: The operator "let+" has type
+         "?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b"
+       but it was expected to have type "'c -> ('d -> 'e) -> 'f"
+       The first argument is labeled "?call_pos",
+       but an unlabeled argument was expected
 |}]
 
 let ( let* ) ?(call_pos = 1) a g = g (call_pos, a);;
@@ -34,19 +36,21 @@ val ( let* ) : ?call_pos:int -> 'a -> (int * 'a -> 'b) -> 'b = <fun>
 Line 4, characters 2-6:
 4 |   let* (call_pos, a) = 1 in
       ^^^^
-Error: The operator let* has type
-         ?call_pos:int -> 'a -> (int * 'a -> 'b) -> 'b
-       but it was expected to have type 'c -> ('d -> 'e) -> 'f
+Error: The operator "let*" has type
+         "?call_pos:int -> 'a -> (int * 'a -> 'b) -> 'b"
+       but it was expected to have type "'c -> ('d -> 'e) -> 'f"
+       The first argument is labeled "?call_pos",
+       but an unlabeled argument was expected
 |}]
 
 (* Infix operators work! *)
-let ( >>| ) ~(call_pos : [%call_pos]) x f = f (call_pos, x)
+let ( >>| ) ?(call_pos = [%call_pos]) x f = f (call_pos, x)
 let _ =
   1 >>| fun (call_pos, a) -> call_pos
 
 [%%expect{|
 val ( >>| ) :
-  call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
+  ?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
 - : lexing_position =
-{pos_fname = ""; pos_lnum = 3; pos_bol = 1128; pos_cnum = 1130}
+{pos_fname = ""; pos_lnum = 3; pos_bol = 1331; pos_cnum = 1333}
 |}]

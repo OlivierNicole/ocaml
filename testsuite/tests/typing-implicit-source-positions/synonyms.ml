@@ -15,9 +15,9 @@ val y : lexing_position =
   {pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
 |}]
 
-let predef_to_module ~(call_pos:[%call_pos]) () : Lexing.position = call_pos ;;
+let predef_to_module ?(call_pos = [%call_pos]) () : Lexing.position = call_pos ;;
 [%%expect{|
-val predef_to_module : call_pos:[%call_pos] -> unit -> Lexing.position =
+val predef_to_module : ?call_pos:[%call_pos] -> unit -> Lexing.position =
   <fun>
 |}]
 
