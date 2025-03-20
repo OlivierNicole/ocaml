@@ -2,44 +2,33 @@
    expect;
 *)
 
-(* lexing_position and Lexing.position are synonyms *)
-let x = Lexing.dummy_pos;;
+(* lexing_location and Textloc.t are synonyms *)
+let x = Textloc.dummy;;
 [%%expect {|
-val x : Lexing.position =
-  {Lexing.pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+val x : Textloc.t = <location: "", line 0, bytes -1--1>
 |}]
 
-let y : lexing_position = x;;
+let y : lexing_location = x;;
 [%%expect {|
-val y : lexing_position =
-  {pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+val y : lexing_location = <location: "", line 0, bytes -1--1>
 |}]
 
-let predef_to_module ?(call_pos = [%call_pos]) () : Lexing.position = call_pos ;;
+let predef_to_module ?(call_pos = [%call_pos]) () : Textloc.t = call_pos ;;
 [%%expect{|
-val predef_to_module : ?call_pos:[%call_pos] -> unit -> Lexing.position =
-  <fun>
+val predef_to_module : ?call_pos:[%call_pos] -> unit -> Textloc.t = <fun>
 |}]
 
-let module_to_predef (call_pos:Lexing.position) : lexing_position = call_pos ;;
+let module_to_predef (call_pos:Textloc.t) : lexing_location = call_pos ;;
 [%%expect{|
-val module_to_predef : Lexing.position -> lexing_position = <fun>
+val module_to_predef : Textloc.t -> lexing_location = <fun>
 |}]
 
-let x = predef_to_module ~call_pos:Lexing.dummy_pos ();;
+let x = predef_to_module ~call_pos:Textloc.dummy ();;
 [%%expect{|
-val x : Lexing.position =
-  {Lexing.pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+val x : Textloc.t = <location: "", line 0, bytes -1--1>
 |}]
 
-let y = module_to_predef Lexing.dummy_pos;;
+let y = module_to_predef Textloc.dummy;;
 [%%expect{|
-val y : lexing_position =
-  {pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
-|}]
-
-(* Fields accessible from within Lexing module *)
-let _ = x.Lexing.pos_cnum = y.Lexing.pos_cnum && x.pos_cnum = y.pos_cnum && x.Lexing.pos_cnum = x.pos_cnum
-[%%expect{|
-- : bool = true
+val y : lexing_location = <location: "", line 0, bytes -1--1>
 |}]

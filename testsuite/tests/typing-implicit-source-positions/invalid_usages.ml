@@ -81,7 +81,7 @@ Hint: Consider marking the argument as a source position with "= [%call_pos]"
 
 let n = fun ?(call_pos = [%call_pos]) () -> call_pos
 [%%expect{|
-val n : ?call_pos:[%call_pos] -> unit -> lexing_position = <fun>
+val n : ?call_pos:[%call_pos] -> unit -> lexing_location = <fun>
 |}]
 
 let _ = n Lexing.dummy_pos ();;
@@ -90,7 +90,7 @@ Line 1, characters 27-29:
 1 | let _ = n Lexing.dummy_pos ();;
                                ^^
 Error: The function applied to this argument has type
-         ?call_pos:[%call_pos] -> lexing_position
+         ?call_pos:[%call_pos] -> lexing_location
 This argument cannot be applied without label
 |}]
 
@@ -119,7 +119,7 @@ Warning 76 [unerasable-position-argument]: this position argument
 class c :
   object
     method this_method_has_an_unerasable_argument :
-      ?pos:[%call_pos] -> lexing_position
+      ?pos:[%call_pos] -> lexing_location
   end
 |}]
 

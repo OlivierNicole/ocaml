@@ -5,7 +5,7 @@
 let ( let+ ) ?(call_pos = [%call_pos]) a f = f (call_pos, a);;
 [%%expect{|
 val ( let+ ) :
-  ?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
+  ?call_pos:[%call_pos] -> 'a -> (lexing_location * 'a -> 'b) -> 'b = <fun>
 |}]
 
 (* Would be nice to add support for implicit position parameters and (also maybe optional
@@ -19,7 +19,7 @@ Line 2, characters 2-6:
 2 |   let+ (call_pos, a) = 1 in
       ^^^^
 Error: The operator "let+" has type
-         "?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b"
+         "?call_pos:[%call_pos] -> 'a -> (lexing_location * 'a -> 'b) -> 'b"
        but it was expected to have type "'c -> ('d -> 'e) -> 'f"
        The first argument is labeled "?call_pos",
        but an unlabeled argument was expected
@@ -50,7 +50,6 @@ let _ =
 
 [%%expect{|
 val ( >>| ) :
-  ?call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
-- : lexing_position =
-{pos_fname = ""; pos_lnum = 3; pos_bol = 1331; pos_cnum = 1333}
+  ?call_pos:[%call_pos] -> 'a -> (lexing_location * 'a -> 'b) -> 'b = <fun>
+- : lexing_location = <location: "", line 3, bytes 2-37>
 |}]

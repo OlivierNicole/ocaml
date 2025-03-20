@@ -20,7 +20,7 @@ let g ?(call_pos = [%call_pos]) () = ()
 val g : ?call_pos:[%call_pos] -> unit -> unit = <fun>
 |}]
 
-let apply (f : t) = f ~call_pos:Lexing.dummy_pos () ;;
+let apply (f : t) = f ~call_pos:Textloc.dummy () ;;
 [%%expect {|
 val apply : t -> unit = <fun>
 |}]
@@ -35,7 +35,7 @@ let _ = apply g ;;
 - : unit = ()
 |}]
 
-let _ = g ~call_pos:Lexing.dummy_pos () ;;
+let _ = g ~call_pos:Textloc.dummy () ;;
 [%%expect{|
 - : unit = ()
 |}]

@@ -4,25 +4,22 @@
 
 let x = (fun ?(pos = [%call_pos]) () -> pos) ()
 [%%expect{|
-val x : lexing_position =
-  {pos_fname = ""; pos_lnum = 1; pos_bol = 23; pos_cnum = 31}
+val x : lexing_location = <location: "", line 1, bytes 8-47>
 |}]
 
 let f = fun ?(call_pos = [%call_pos]) () -> call_pos
 [%%expect{|
-val f : ?call_pos:[%call_pos] -> unit -> lexing_position = <fun>
+val f : ?call_pos:[%call_pos] -> unit -> lexing_location = <fun>
 |}]
 
 let _ = f ~call_pos:x () ;;
 [%%expect{|
-- : lexing_position =
-{pos_fname = ""; pos_lnum = 1; pos_bol = 23; pos_cnum = 31}
+- : lexing_location = <location: "", line 1, bytes 8-47>
 |}]
 
 let _ = "Increment line count"
 let _ = f ~call_pos:(f ()) () ;;
 [%%expect{|
 - : string = "Increment line count"
-- : lexing_position =
-{pos_fname = ""; pos_lnum = 2; pos_bol = 469; pos_cnum = 489}
+- : lexing_location = <location: "", line 2, bytes 20-26>
 |}]
