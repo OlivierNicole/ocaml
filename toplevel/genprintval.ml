@@ -351,7 +351,8 @@ module Make(O : OBJ)(EVP : EVALPATH with type valu = O.t) = struct
                   when Path.same path Predef.path_lexing_location ->
                 let loc = (O.obj obj : Textloc.t) in
                 Oval_stuff
-                    (Format.sprintf "<location: line %d, bytes %d-%d>"
+                    (Format.sprintf "<location: %S, line %d, bytes %d-%d>"
+                      (Textloc.filename loc)
                       (Textloc.line_num loc)
                       (Textloc.line_pos loc)
                       (Textloc.end_pos loc))
