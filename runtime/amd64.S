@@ -719,6 +719,16 @@ FUNCTION(G(caml_c_call_stack_args))
 CFI_STARTPROC
         CFI_SIGNAL_FRAME
         ENTER_FUNCTION
+#ifdef WITH_THREAD_SANITIZER
+        TSAN_SAVE_CALLER_REGS
+    /* Also save %r12 and %r13 */
+        pushq %r12; CFI_ADJUST(8);
+        pushq %r13; CFI_ADJUST(8);
+        TSAN_ENTER_FUNCTION(16)
+        popq %r13; CFI_ADJUST(-8);
+        popq %r12; CFI_ADJUST(-8);
+        TSAN_RESTORE_CALLER_REGS
+#endif
     /* Arguments:
         C arguments         : %rdi, %rsi, %rdx, %rcx, %r8, and %r9
         C function          : %rax
@@ -757,6 +767,16 @@ LBL(106):
         movq    Caml_state(young_ptr), %r15
     /* Load ocaml stack and restore global variables */
         SWITCH_C_TO_OCAML
+#ifdef WITH_THREAD_SANITIZER
+    /* Save non-callee-saved registers %rax and %xmm0 before C call */
+        pushq   %rax; CFI_ADJUST(8);
+        subq    $16, %rsp; CFI_ADJUST(16);
+        movupd   %xmm0, (%rsp)
+        TSAN_EXIT_FUNCTION
+        movupd  (%rsp), %xmm0
+        addq    $16, %rsp; CFI_ADJUST(-16);
+        popq    %rax; CFI_ADJUST(-8);
+#endif
     /* Return to OCaml caller */
         LEAVE_FUNCTION
         RET_FROM_C_CALL
