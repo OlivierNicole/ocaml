@@ -248,11 +248,12 @@ void caml_tsan_exit_on_raise_c(char* limit)
 {
   unw_context_t uc;
   unw_cursor_t cursor;
-  unw_word_t sp;
+  unw_word_t initial_sp, sp;
 #ifdef TSAN_DEBUG
   unw_word_t prev_pc;
 #endif
   int ret;
+  bool first_iteration = true;
 
   ret = unw_getcontext(&uc);
   if (ret != 0)
@@ -261,7 +262,7 @@ void caml_tsan_exit_on_raise_c(char* limit)
   if (ret != 0)
     caml_fatal_error("unw_init_local failed with code %d", ret);
 
-  while (1) {
+  do {
 #ifdef TSAN_DEBUG
     if (unw_get_reg(&cursor, UNW_REG_IP, &prev_pc) < 0) {
       caml_fatal_error("unw_get_reg IP failed with code %d", ret);
@@ -277,6 +278,11 @@ void caml_tsan_exit_on_raise_c(char* limit)
     }
 
     ret = unw_get_reg(&cursor, UNW_REG_SP, &sp);
+    if (first_iteration) {
+      initial_sp = sp;
+      first_iteration = false;
+    }
+
     if (ret != 0)
       caml_fatal_error("unw_get_reg SP failed with code %d", ret);
 #ifdef TSAN_DEBUG
@@ -284,10 +290,10 @@ void caml_tsan_exit_on_raise_c(char* limit)
 #endif
     __tsan_func_exit(NULL);
 
-    if ((char*)sp >= limit) {
-      break;
-    }
-  }
+    /* Stop if the stack pointer is no longer in the contiguous C stack chunk
+       delimited by the initial sp and the limit. This should work on all
+       supported platforms. */
+  } while (initial_sp <= sp && (char*)sp < limit);
 }
 
 /* This function iterates on each stack frame of the current fiber. This is
