@@ -797,7 +797,7 @@ LBL(106):
         popq    %rbp; CFI_ADJUST(-8)
         ret
 CFI_ENDPROC
-END_FUNCTION(caml_c_call_copy_stack_args)
+ENDFUNCTION(G(caml_c_call_copy_stack_args))
 
 /******************************************************************************/
 /* Start the OCaml program */
