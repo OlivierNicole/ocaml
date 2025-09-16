@@ -726,12 +726,7 @@ CFI_STARTPROC
         ENTER_FUNCTION
 #ifdef WITH_THREAD_SANITIZER
         TSAN_SAVE_CALLER_REGS
-    /* Also save %r12 and %r13 */
-        pushq %r12; CFI_ADJUST(8);
-        pushq %r13; CFI_ADJUST(8);
         TSAN_ENTER_FUNCTION(16)
-        popq %r13; CFI_ADJUST(-8);
-        popq %r12; CFI_ADJUST(-8);
         TSAN_RESTORE_CALLER_REGS
 #endif
     /* Arguments:
@@ -776,6 +771,14 @@ CFI_STARTPROC
         pushq   %rbp; CFI_ADJUST(8)
         movq    %rsp, %rbp
         CFI_DEF_CFA_REGISTER(DW_REG_rbp)
+#ifdef WITH_THREAD_SANITIZER
+    /* The pushed arguments will be considered to be a stack frame, TSan must
+       know about it */
+        TSAN_SAVE_CALLER_REGS
+        movq    (FRAME_POINTER_SIZE)(%rsp), C_ARG_1
+        C_call  (GCALL(__tsan_func_entry));
+        TSAN_RESTORE_CALLER_REGS
+#endif
     /* Copy arguments from OCaml to C stack */
 LBL(105):
         subq    $8, %r12
@@ -795,6 +798,17 @@ LBL(106):
         movq    %rbp, %rsp
         CFI_DEF_CFA_REGISTER(DW_REG_rsp)
         popq    %rbp; CFI_ADJUST(-8)
+#ifdef WITH_THREAD_SANITIZER
+    /* Save non-callee-saved registers %rax and %xmm0 before C call */
+        pushq   %rax; CFI_ADJUST(8);
+        subq    $16, %rsp; CFI_ADJUST(16);
+        movupd   %xmm0, (%rsp)
+        movq    $0, C_ARG_1
+        C_call  (GCALL(__tsan_func_exit))
+        movupd  (%rsp), %xmm0
+        addq    $16, %rsp; CFI_ADJUST(-16);
+        popq    %rax; CFI_ADJUST(-8);
+#endif
         ret
 CFI_ENDPROC
 ENDFUNCTION(G(caml_c_call_copy_stack_args))
