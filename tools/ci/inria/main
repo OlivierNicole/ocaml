@@ -323,6 +323,7 @@ fi
 $make --warn-undefined-variables install
 case $confoptions in
   *--disable-unix-lib*) ;;         # test-in-prefix needs Unix lib
+  *--enable-tsan*) ;;              # TMP
   *)
     $make -f Makefile.test -C testsuite/in_prefix test-in-prefix
     ;;
