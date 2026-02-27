@@ -1050,14 +1050,14 @@ FUNCTION caml_resume
         TSAN_SAVE_CALLER_REGS
         SWITCH_OCAML_TO_C
         TSAN_SETUP_C_CALL 16
-        std     3, (RESERVED_STACK + 0)(SP)
+    /* save r6 (cont_head) clobbered by first Far_call */
+        std     6, (RESERVED_STACK + 0)(SP)
     /* Necessary to include the caller of caml_resume in the TSan backtrace */
         mr      3, 0            /* arg1: return address in caller */
         Far_call(caml_tsan_func_entry_asm)
     /* Signal to TSan all stack frames exited by the perform. */
-        ld      3, (RESERVED_STACK + 0)(SP)
-        mr      5, 6            /* arg3: fiber (cont_head) */
-        ld      4, Stack_sp(6)  /* arg2: SP at perform */
+        ld      5, (RESERVED_STACK + 0)(SP) /* arg3: cont_head */
+        ld      4, Stack_sp(5)  /* arg2: SP at perform */
         ld      3, LR_SAVE(4)   /* arg1: PC of perform */
         Far_call(caml_tsan_entry_on_resume)
         TSAN_CLEANUP_AFTER_C_CALL 16

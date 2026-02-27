@@ -1167,16 +1167,20 @@ FUNCTION(caml_resume)
         ldr     x3, Stack_handler(x0)
         ldr     x3, Handler_parent(x3) /* x3 = cont_head */
 #if defined(WITH_THREAD_SANITIZER)
-    /* Save non-callee-saved registers x0, x2, x3 and x4 */
-        stp     x0, x2, [sp, -16]!
+    /* Save non-callee-saved registers x0, x1, x2, x3 and x4 */
+        stp     x0, x1, [sp, -16]!
         CFI_ADJUST(16)
-        stp     x3, x4, [sp, -16]!
+        stp     x2, x3, [sp, -16]!
+        CFI_ADJUST(16)
+        str     x4, [sp, -16]!
         CFI_ADJUST(16)
     /* Necessary to include the caller of caml_resume in the TSan backtrace */
         TSAN_ENTER_FUNCTION
-        ldp     x3, x4, [sp], 16
+        ldr     x4, [sp], 16
         CFI_ADJUST(-16)
-        ldp     x0, x2, [sp], 16
+        ldp     x2, x3, [sp], 16
+        CFI_ADJUST(-16)
+        ldp     x0, x1, [sp], 16
         CFI_ADJUST(-16)
         TSAN_SAVE_CALLER_REGS
     /* Signal to TSan all stack frames exited by the perform. */
