@@ -8,6 +8,7 @@ end
 *)
 
 let size = 50_000
+let spread = 1
 
 let keys = Array.init size ref
 
@@ -20,7 +21,7 @@ let rec mk n : tree =
     Node [e]
 
 let () =
-  let tree = Array.init 10 (fun _ -> mk (size / 10)) in
+  let tree = Array.init spread (fun _ -> mk ((size - 1) / spread)) in
   for _ = 1 to 10 do
     Gc.major ();
     Printf.printf ".%!";

@@ -1690,7 +1690,14 @@ static void stw_cycle_all_domains(
      previous cycle. */
   adopt_orphaned_work ();
   CAMLassert(domain->ephe_info->todo == (value) NULL);
-  domain->ephe_info->todo = domain->ephe_info->live;
+  //domain->ephe_info->todo = domain->ephe_info->live;
+  while (domain->ephe_info->live != (value)NULL)
+  {
+    value tmp = domain->ephe_info->live;
+    domain->ephe_info->live = Ephe_link(tmp);
+    Ephe_link(tmp) = domain->ephe_info->todo;
+    domain->ephe_info->todo = tmp;
+  }
   domain->ephe_info->live = (value) NULL;
   domain->ephe_info->must_sweep_ephe = 0;
   domain->ephe_info->cycle = 0;
