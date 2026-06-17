@@ -92,6 +92,17 @@ let build_graph fundecl =
         interf i.next
     | Iop(Itailcall_ind) -> ()
     | Iop(Itailcall_imm _) -> ()
+    | Iop(Iatomic_fetch_add) ->
+        add_interf_set i.res i.live;
+        add_interf_self i.res;
+        (* On LL/SC backends (arm64, power), the result register is written
+           by the load-exclusive partway through the multi-instruction
+           expansion, while the address (arg.(0)) and increment (arg.(1))
+           are still needed for the store-exclusive and the add.  Force the
+           result to differ from both arguments so the register allocator
+           cannot coalesce them even when those arguments die here. *)
+        add_interf_set i.res (Reg.set_of_array i.arg);
+        interf i.next
     | Iop _ ->
         add_interf_set i.res i.live;
         add_interf_self i.res;
