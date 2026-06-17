@@ -163,5 +163,3 @@ let () =
   for _ = 1 to 500 do Atomic.incr a done;
   for _ = 1 to 200 do Atomic.decr a done;
   check "incr/decr" (Atomic.get a = 300)
-
-let () = print_endline "OK"
