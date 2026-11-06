@@ -117,16 +117,6 @@ module type S = sig
   (** [last_line l] is the line position on which [last_byte l] lies.
       Irrelevant if {!is_none} or {!is_empty} is [true].*)
 
-  type line_range =
-    | Single_line of line_pos
-    | Range of line_pos * line_pos
-  (** Represents a line range, with a special case for single-line ranges. *)
-
-  val line_range : t -> line_range
-  (** [line_range l] is the range between [first_line l] and [last_line l].
-      If [fst (first_line l) = fst (last_line l)], then [line_range l] is
-      [Single_line (first_line l)]. *)
-
   val set_first : t -> first_byte:byte_pos -> first_line:line_pos -> t
   (** [set_first l ~first_byte ~first_line] sets the the first position of
       [l] to given values. *)
@@ -164,13 +154,6 @@ module type S = sig
 end
 
 include S with type t = textloc
-
-type view =
-  { file : string;
-    first_byte : byte_pos; last_byte : byte_pos;
-    first_line : line_pos; last_line : line_pos }
-
-val view : t -> view
 
 val of_lexing_range : Lexing.position -> Lexing.position -> t
 
