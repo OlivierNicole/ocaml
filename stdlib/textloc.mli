@@ -14,11 +14,13 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(** [Textloc.t] is the type of source code locations given to implicit location
-    arguments. *)
+(** {1:locations Text locations} *)
+
+(** [Textloc.t] is the type of text locations, given, notably, to implicit
+    location arguments. *)
 
 module type S = sig
-  include CamlinternalTextloc.S
+  include CamlinternalTextloc.S (** @inline *)
 
   (** {2:fmt Formatting} *)
 
@@ -31,7 +33,9 @@ module type S = sig
       convention}. *)
 end
 
-include S
+include S (** @inline *)
+
+(** {1:compact Compact representation} *)
 
 module Compact : S with type t = textloc
 
