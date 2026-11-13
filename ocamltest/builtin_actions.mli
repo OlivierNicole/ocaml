@@ -15,36 +15,36 @@
 
 (* Definition of a few built-in actions *)
 
-val pass : Actions.t
-val skip : Actions.t
-val fail : Actions.t
+val pass : Tests.t
+val skip : Tests.t
+val fail : Tests.t
 
-val dumpenv : Actions.t
+val dumpenv : Tests.t
 
-val hasunix : Actions.t
-val libunix : Actions.t
-val libwin32unix : Actions.t
+val hasunix : Tests.t
+val libunix : Tests.t
+val libwin32unix : Tests.t
 
-val windows : Actions.t
-val bsd : Actions.t
+val windows : Tests.t
+val bsd : Tests.t
 
-val arch32 : Actions.t
-val arch64 : Actions.t
+val arch32 : Tests.t
+val arch64 : Tests.t
 
 (** Whether the compiler target is POWER architecture. *)
-val arch_power : Actions.t
+val arch_power : Tests.t
 
-val has_symlink : Actions.t
+val has_symlink : Tests.t
 
-val setup_build_env : Actions.t
+val setup_build_env : Tests.t
 
-val setup_simple_build_env : Actions.t
+val setup_simple_build_env : Tests.t
 
-val run : Actions.t
-val script : Actions.t
+val run : Tests.t
+val script : Tests.t
 
-val check_program_output : Actions.t
+val check_program_output : Tests.t
 
-val file_exists : Actions.t
+val file_exists : Tests.t
 
-val copy : Actions.t
+val copy : Tests.t

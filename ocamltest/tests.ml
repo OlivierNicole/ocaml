@@ -15,47 +15,17 @@
 
 (* Definition of tests, built from actions *)
 
-type t = {
-  test_name : string;
-  test_run_by_default : bool;
-  test_actions : Actions.t list;
-  test_description : string
-}
+type code = out_channel -> Environments.t -> Test_result.t * Environments.t
 
-let null = {
-  test_name = "*pass*";
-  test_run_by_default = false;
-  test_actions = [];
-  test_description = "dummy test inserted by parser; always pass"
-}
+type t = code list
 
-let compare t1 t2 = String.compare t1.test_name t2.test_name
+let null = []
 
-let (tests: (string, t) Hashtbl.t) = Hashtbl.create 20
+module Table = Hashtbl.Make(String)
 
-let register test = Hashtbl.add tests test.test_name test
+type table = t Table.t
 
-let get_registered_tests () =
-  let f _test_name test acc = test::acc in
-  let unsorted_tests = Hashtbl.fold f tests [] in
-  List.sort compare unsorted_tests
-
-let default_tests () =
-  let f _test_name test acc =
-    if test.test_run_by_default then test::acc else acc in
-  Hashtbl.fold f tests []
-
-let lookup name =
-  try Some (Hashtbl.find tests name)
-  with Not_found -> None
-
-let test_of_action action =
-{
-  test_name = Actions.name action;
-  test_run_by_default = false;
-  test_actions = [action];
-  test_description = Actions.description action;
-}
+let
 
 let run_actions log testenv actions =
   let total = List.length actions in

@@ -15,6 +15,7 @@
 
 (* Definition of actions, basic blocks for tests *)
 
+(*
 type code = out_channel -> Environments.t -> Test_result.t * Environments.t
 
 type t = {
@@ -77,3 +78,4 @@ module ActionSet = Set.Make
 end)
 
 let _ = Variables.register_variable action_name
+*)

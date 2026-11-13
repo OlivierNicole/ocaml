@@ -15,20 +15,26 @@
 
 (* Definition of tests, built from actions *)
 
+(*
 type t = {
   test_name : string;
   test_run_by_default : bool;
   test_actions : Actions.t list;
   test_description : string
 }
+*)
+
+type code = out_channel -> Environments.t -> Test_result.t * Environments.t
+
+type t = code list
 
 val null : t
 
-val compare : t -> t -> int
+module Table : Hashtbl.S with type key = string
 
-val register : t -> unit
+type table = t Table.t
 
-val get_registered_tests : unit -> t list
+val run_by_default : table
 
 val default_tests : unit -> t list
 
@@ -36,6 +42,8 @@ val lookup : string -> t option
 
 val run : out_channel -> Environments.t -> t -> Test_result.t * Environments.t
 
+(*
 val test_of_action : Actions.t -> t
+*)
 
 module TestSet : Set.S with type elt = t
